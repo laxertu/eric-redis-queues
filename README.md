@@ -1,4 +1,4 @@
-Redis support for eric-sse (https://laxertu.github.io/eric/)
+Redis support for eric-sse
 
 A queue here is a Redis key value where key is listener id and value is a list of Jsons with messages information.
 

@@ -1,6 +1,6 @@
 Redis support for eric-sse
 
-A queue here is a Redis key value where key is listener id and value is a list of Jsons with messages information.
+A queue here is a Redis key value, where key is listener id and value is a list of Json data with messages information.
 
 Example of usage::
 

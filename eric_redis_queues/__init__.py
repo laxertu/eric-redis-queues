@@ -1,17 +1,11 @@
 import json
-from json import JSONDecodeError
 from uuid import uuid4
 
 from redis import Redis
-from redis.exceptions import ResponseError
 
 from eric_sse.exception import NoMessagesException
 from eric_sse.message import Message
-from eric_sse.queue import Queue, AbstractMessageQueueFactory
-
-
-class RepositoryError(Exception):
-    ...
+from eric_sse.queue import Queue, AbstractMessageQueueFactory, RepositoryError
 
 class RedisQueue(Queue):
     def __init__(self, host='127.0.0.1', port=6379, db=0):
@@ -25,16 +19,14 @@ class RedisQueue(Queue):
                 raise NoMessagesException
             value=json.loads(raw_value.decode())
             return Message(type=value['type'], payload=value['payload'])
-        except ResponseError as e:
-            raise RepositoryError(e)
-        except JSONDecodeError as e:
+        except Exception as e:
             raise RepositoryError(e)
 
     def push(self, msg: Message) -> None:
         value = json.dumps({'type': msg.type, 'payload': msg.payload})
         try:
             self.__client.rpush(self.id, value)
-        except ResponseError as e:
+        except Exception as e:
             raise RepositoryError(e)
 
     def delete(self) -> None:

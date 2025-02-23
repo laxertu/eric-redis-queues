@@ -15,12 +15,14 @@ class RedisQueue(Queue):
     def pop(self) -> Message:
         try:
             raw_value = self.__client.lpop(self.id)
-            if raw_value is None:
-                raise NoMessagesException
-            value=json.loads(raw_value.decode())
-            return Message(type=value['type'], payload=value['payload'])
         except Exception as e:
             raise RepositoryError(e)
+
+        if raw_value is None:
+            raise NoMessagesException
+
+        value = json.loads(raw_value.decode())
+        return Message(msg_type=value['type'], msg_payload=value['payload'])
 
     def push(self, msg: Message) -> None:
         value = json.dumps({'type': msg.type, 'payload': msg.payload})

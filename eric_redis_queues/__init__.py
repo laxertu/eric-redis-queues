@@ -8,7 +8,7 @@ from eric_sse.exception import NoMessagesException
 from eric_sse.message import MessageContract
 from eric_sse.queue import Queue, AbstractMessageQueueFactory, RepositoryError
 
-_PREFIX = 'eric_queues:'
+_PREFIX = 'eric_queues'
 
 class RedisQueue(Queue):
 

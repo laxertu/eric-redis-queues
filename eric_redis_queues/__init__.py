@@ -1,34 +1,41 @@
 import json
+from typing import Any
 from uuid import uuid4
+from pickle import dumps, loads
 
 from redis import Redis
 
+from eric_sse.entities import AbstractChannel
 from eric_sse.exception import NoMessagesException
-from eric_sse.message import Message
+from eric_sse.message import MessageContract
 from eric_sse.queue import Queue, AbstractMessageQueueFactory, RepositoryError
 
+_PREFIX = 'eric_queues:'
+
 class RedisQueue(Queue):
+
     def __init__(self, host='127.0.0.1', port=6379, db=0):
         self.id = str(uuid4())
         self.__client = Redis(host=host, port=port, db=db)
 
-    def pop(self) -> Message:
+    def pop(self) -> MessageContract:
+
+        if not self.__client.exists(f'{_PREFIX}:{self.id}'):
+            raise NoMessagesException
+
         try:
-            raw_value = self.__client.lpop(self.id)
+            raw_value = self.__client.lpop(f'{_PREFIX}:{self.id}')
+            return loads(raw_value)
+
         except Exception as e:
             raise RepositoryError(e)
 
-        if raw_value is None:
-            raise NoMessagesException
 
-        value = json.loads(raw_value.decode())
-        return Message(msg_type=value['type'], msg_payload=value['payload'])
-
-    def push(self, msg: Message) -> None:
-        value = json.dumps({'type': msg.type, 'payload': msg.payload})
+    def push(self, msg: MessageContract) -> None:
         try:
-            self.__client.rpush(self.id, value)
+            self.__client.rpush(f'{_PREFIX}:{self.id}', dumps(msg))
         except Exception as e:
+            print(msg)
             raise RepositoryError(e)
 
     def delete(self) -> None:
@@ -43,3 +50,11 @@ class RedisQueueFactory(AbstractMessageQueueFactory):
 
     def create(self) -> Queue:
         return RedisQueue(host=self.__host, port=self.__port, db=self.__db)
+
+class RedisChannel(AbstractChannel):
+    def __init__(self, host='127.0.0.1', port=6379, db=0):
+        super().__init__()
+        self._set_queues_factory(RedisQueueFactory(host=host, port=port, db=db))
+
+    def adapt(self, msg: MessageContract) -> Any:
+        pass

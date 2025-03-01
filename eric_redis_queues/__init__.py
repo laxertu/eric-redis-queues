@@ -35,7 +35,6 @@ class RedisQueue(Queue):
         try:
             self.__client.rpush(f'{_PREFIX}:{self.id}', dumps(msg))
         except Exception as e:
-            print(msg)
             raise RepositoryError(e)
 
     def delete(self) -> None:
@@ -56,5 +55,5 @@ class RedisChannel(AbstractChannel):
         super().__init__()
         self._set_queues_factory(RedisQueueFactory(host=host, port=port, db=db))
 
-    def adapt(self, msg: MessageContract) -> Any:
-        pass
+    def adapt(self, msg: MessageContract) -> MessageContract:
+        return msg

@@ -8,7 +8,6 @@ from eric_sse.exception import NoMessagesException
 from eric_sse.message import MessageContract
 from eric_sse.queue import Queue, AbstractMessageQueueFactory, RepositoryError
 
-_PREFIX = 'eric_queues'
 
 class RedisQueue(Queue):
 
@@ -34,7 +33,7 @@ class RedisQueue(Queue):
 
     def push(self, msg: MessageContract) -> None:
         try:
-            self.__client.rpush(f'{_PREFIX}:{self.id}', dumps(msg))
+            self.__client.rpush(self.id, dumps(msg))
         except Exception as e:
             raise RepositoryError(e)
 
@@ -65,8 +64,8 @@ class RedisChannel(AbstractChannel):
             self._set_queues_factory(f)
 
             redis_client = Redis(host=host, port=port, db=db)
-            for redis_queue in redis_client.scan_iter(f"{_PREFIX}:*"):
-                print(redis_queue.decode())
+            for redis_queue in redis_client.scan_iter('*'):
+
                 queue = f.load(redis_queue.decode())
                 listener = MessageQueueListener()
                 listener.id = redis_queue.decode()

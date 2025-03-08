@@ -9,16 +9,12 @@ try:
     ch.get_listener(listener_id=l_id).start_sync()
 
 except IndexError:
-    print("Usage: python run.py <ERIC Redis Queue>")
+    print("Usage: python run.py <listener id>")
     sys.exit(0)
 except InvalidListenerException:
     print("Invalid id")
     sys.exit(0)
-#ch.broadcast(sm)
-#ch.broadcast(um)
-#ch.broadcast(m)
 
-#exit(0)
 while True:
     try:
         x = ch.deliver_next(l_id)

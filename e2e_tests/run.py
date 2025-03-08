@@ -23,6 +23,7 @@ while True:
     try:
         x = ch.deliver_next(l_id)
         print(x)
+        print(x.type, x.payload)
     except NoMessagesException:
         print('done')
         exit(0)

@@ -8,6 +8,7 @@ from eric_sse.exception import NoMessagesException
 from eric_sse.message import MessageContract
 from eric_sse.queue import Queue, AbstractMessageQueueFactory, RepositoryError
 
+_PREFIX = 'eric-redis-queues'
 
 class RedisQueue(Queue):
 
@@ -20,11 +21,11 @@ class RedisQueue(Queue):
 
     def pop(self) -> MessageContract:
 
-        if not self.__client.exists(self.id):
+        if not self.__client.exists(f'{_PREFIX}:{self.id}'):
             raise NoMessagesException
 
         try:
-            raw_value = self.__client.lpop(self.id)
+            raw_value = self.__client.lpop(f'{_PREFIX}:{self.id}')
             return loads(raw_value)
 
         except Exception as e:
@@ -33,7 +34,7 @@ class RedisQueue(Queue):
 
     def push(self, msg: MessageContract) -> None:
         try:
-            self.__client.rpush(self.id, dumps(msg))
+            self.__client.rpush(f'{_PREFIX}:{self.id}', dumps(msg))
         except Exception as e:
             raise RepositoryError(e)
 
@@ -64,11 +65,12 @@ class RedisChannel(AbstractChannel):
             self._set_queues_factory(f)
 
             redis_client = Redis(host=host, port=port, db=db)
-            for redis_queue in redis_client.scan_iter('*'):
+            for redis_queue in redis_client.scan_iter(f"{_PREFIX}:*"):
 
-                queue = f.load(redis_queue.decode())
+                queue = f.load(redis_queue.decode()[len(_PREFIX) + 1:])
                 listener = MessageQueueListener()
-                listener.id = redis_queue.decode()
+                listener.id = redis_queue.decode()[len(_PREFIX) + 1:]
+
                 self.register_listener(listener)
                 self._set_queue(listener_id=listener.id, queue=queue)
 

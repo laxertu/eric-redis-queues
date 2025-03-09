@@ -49,7 +49,9 @@ class RedisQueueFactory(AbstractMessageQueueFactory):
         self.__db: int = db
 
     def create(self) -> Queue:
-        return RedisQueue(host=self.__host, port=self.__port, db=self.__db)
+        queue = RedisQueue(host=self.__host, port=self.__port, db=self.__db)
+
+        return queue
 
     def load(self, queue_id: str) -> RedisQueue:
         redis_queue = RedisQueue(host=self.__host, port=self.__port, db=self.__db)
@@ -61,15 +63,17 @@ class RedisChannel(AbstractChannel):
     def __init__(self, host='127.0.0.1', port=6379, db=0):
         try:
             super().__init__()
-            f = RedisQueueFactory(host=host, port=port, db=db)
-            self._set_queues_factory(f)
+            queues_factory = RedisQueueFactory(host=host, port=port, db=db)
+            self._set_queues_factory(queues_factory)
 
             redis_client = Redis(host=host, port=port, db=db)
             for redis_queue in redis_client.scan_iter(f"{_PREFIX}:*"):
 
-                queue = f.load(redis_queue.decode()[len(_PREFIX) + 1:])
+                queue_id = redis_queue.decode()[len(_PREFIX) + 1:]
+
+                queue = queues_factory.load(queue_id)
                 listener = MessageQueueListener()
-                listener.id = redis_queue.decode()[len(_PREFIX) + 1:]
+                listener.id = queue_id
 
                 self.register_listener(listener)
                 self._set_queue(listener_id=listener.id, queue=queue)

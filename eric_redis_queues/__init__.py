@@ -1,3 +1,4 @@
+from typing import Iterable, Any
 from uuid import uuid4
 from pickle import dumps, loads
 
@@ -40,6 +41,22 @@ class RedisQueue(Queue):
 
     def delete(self) -> None:
         self.__client.delete(self.id)
+
+
+class RedisEventListener:
+    """See https://redis.io/glossary/event-queue/"""
+    def __init__(self, host='127.0.0.1', port=6379, db=0):
+        self.__client = Redis(host=host, port=port, db=db)
+
+    def listen(self, key: str) -> Iterable[MessageContract]:
+
+        while True:
+            try:
+                x: MessageContract = loads(self.__client.blpop(keys=[key])[1])
+                yield x
+
+            except Exception as e:
+                raise RepositoryError(e)
 
 
 class RedisQueueFactory(AbstractMessageQueueFactory):

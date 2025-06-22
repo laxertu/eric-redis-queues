@@ -13,20 +13,20 @@ _PREFIX = 'eric-redis-queues'
 
 class RedisQueue(Queue):
 
-    def __init__(self, host='127.0.0.1', port=6379, db=0):
-        self.id = str(uuid4())
+    def __init__(self, redis_key: str, host='127.0.0.1', port=6379, db=0):
+        self.__redis_key = redis_key
         self.__client = Redis(host=host, port=port, db=db)
 
-    def bind(self, queue_id: str):
-        self.id = queue_id
+    def bind(self, redis_key: str):
+        self.__redis_key = redis_key
 
     def pop(self) -> MessageContract:
 
-        if not self.__client.exists(f'{_PREFIX}:{self.id}'):
+        if not self.__client.exists(f'{_PREFIX}:{self.__redis_key}'):
             raise NoMessagesException
 
         try:
-            raw_value = self.__client.lpop(f'{_PREFIX}:{self.id}')
+            raw_value = self.__client.lpop(f'{_PREFIX}:{self.__redis_key}')
             return loads(raw_value)
 
         except Exception as e:
@@ -35,12 +35,12 @@ class RedisQueue(Queue):
 
     def push(self, msg: MessageContract) -> None:
         try:
-            self.__client.rpush(f'{_PREFIX}:{self.id}', dumps(msg))
+            self.__client.rpush(f'{_PREFIX}:{self.__redis_key}', dumps(msg))
         except Exception as e:
             raise RepositoryError(e)
 
     def delete(self) -> None:
-        self.__client.delete(self.id)
+        self.__client.delete(self.__redis_key)
 
 
 class RedisEventListener:
@@ -70,11 +70,16 @@ class RedisQueueFactory(AbstractMessageQueueFactory):
 
         return queue
 
-    def load(self, queue_id: str) -> RedisQueue:
-        redis_queue = RedisQueue(host=self.__host, port=self.__port, db=self.__db)
-        redis_queue.bind(queue_id)
+    def load(self, redis_key: str) -> RedisQueue:
+        redis_queue = RedisQueue(redis_key=redis_key, host=self.__host, port=self.__port, db=self.__db)
+        redis_queue.bind(redis_key)
 
         return redis_queue
+
+    def reset_repository(self) -> None:
+        redis_client = Redis(host=self.__host, port=self.__port, db=self.__db)
+        for redis_queue in redis_client.scan_iter(f"{_PREFIX}:*"):
+            redis_client.delete(redis_queue)
 
 class RedisChannel(AbstractChannel):
     def __init__(self, host='127.0.0.1', port=6379, db=0):
@@ -87,7 +92,6 @@ class RedisChannel(AbstractChannel):
             for redis_queue in redis_client.scan_iter(f"{_PREFIX}:*"):
 
                 queue_id = redis_queue.decode()[len(_PREFIX) + 1:]
-
                 queue = queues_factory.load(queue_id)
                 listener = MessageQueueListener()
                 listener.id = queue_id

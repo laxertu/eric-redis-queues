@@ -17,6 +17,10 @@ class RedisQueue(Queue):
         self.__redis_key = redis_key
         self.__client = Redis(host=host, port=port, db=db)
 
+    @property
+    def redis_key(self) -> str:
+        return self.__redis_key
+
     def bind(self, redis_key: str):
         self.__redis_key = redis_key
 
@@ -66,7 +70,7 @@ class RedisQueueFactory(AbstractMessageQueueFactory):
         self.__db: int = db
 
     def create(self) -> Queue:
-        queue = RedisQueue(host=self.__host, port=self.__port, db=self.__db)
+        queue = RedisQueue(redis_key=str(uuid4()), host=self.__host, port=self.__port, db=self.__db)
 
         return queue
 

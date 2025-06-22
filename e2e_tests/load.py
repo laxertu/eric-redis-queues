@@ -11,3 +11,5 @@ l = ch.add_listener()
 ch.broadcast(sm)
 ch.broadcast(um)
 ch.broadcast(m)
+
+print(l.re)

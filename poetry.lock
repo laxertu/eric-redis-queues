@@ -29,21 +29,21 @@ files = [
 
 [[package]]
 name = "eric-sse"
-version = "0.7.4"
+version = "0.7.9"
 description = "A lightweight message dispatcher based on SSE protocol data transfer objects format"
 optional = false
 python-versions = "<3.12,>=3.10"
 groups = ["main"]
 files = [
-    {file = "eric_sse-0.7.4-py3-none-any.whl", hash = "sha256:6e7d3b4abda1175218cde7bb6ead89eaa3867144c6ce16b3ad487c62baa75e6b"},
-    {file = "eric_sse-0.7.4.tar.gz", hash = "sha256:af12a90c63da62ffac1cccfebcbc51f3ab0e50ed1fbced04dc6734ab0132fe0b"},
+    {file = "eric_sse-0.7.9-py3-none-any.whl", hash = "sha256:4064925d2db669e52a48518ea3bc285eeaed249b1ab461343571381be7c43bed"},
+    {file = "eric_sse-0.7.9.tar.gz", hash = "sha256:eb09991a46ad7b0b61422494981bc3f0b229373b1f764f8895c9202485c9fdb1"},
 ]
 
 [package.dependencies]
 asyncio = ">=3.4.3,<3.4.4"
 
 [package.extras]
-redis-queues = ["eric-redis-queues (>=0.0.4,<0.0.5)"]
+eric-redis-queues = ["eric-redis-queues (>=0.0.6,<0.0.7)"]
 
 [[package]]
 name = "redis"
@@ -67,4 +67,4 @@ ocsp = ["cryptography (>=36.0.1)", "pyopenssl (==23.2.1)", "requests (>=2.31.0)"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10, <3.12"
-content-hash = "6387854c51421a14e6a3186200d4d9ce8630db091d9f196967dce07661313155"
+content-hash = "0f5dce6330b1e11706be7ab933570ce97ba1f1cc47f89e2af64f9bd5233d583d"

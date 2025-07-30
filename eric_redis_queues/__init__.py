@@ -109,7 +109,7 @@ class RedisConnectionsRepository(ConnectionRepositoryInterface):
 
 
 
-class RedisChannelRepository(ChannelRepositoryInterface):
+class RedisSSEChannelRepository(ChannelRepositoryInterface):
     def __init__(self, host='127.0.0.1', port=6379, db=0):
         self.__host: str = host
         self.__port: int = port
@@ -135,7 +135,7 @@ class RedisChannelRepository(ChannelRepositoryInterface):
         except Exception as e:
             raise RepositoryError(e)
 
-    def persist(self, channel: ObjectPersistenceMixin):
+    def persist(self, channel: SSEChannel):
         try:
             self.__client.set(f'{_PREFIX_CHANNELS}:{channel.id}', json.dumps(channel.value_as_dict))
         except Exception as e:

@@ -29,14 +29,14 @@ files = [
 
 [[package]]
 name = "eric-sse"
-version = "1.0.0a9"
+version = "1.0.0a10"
 description = "A lightweight message dispatcher based on SSE protocol data transfer objects format"
 optional = false
 python-versions = "<3.12,>=3.10"
 groups = ["main"]
 files = [
-    {file = "eric_sse-1.0.0a9-py3-none-any.whl", hash = "sha256:87e1d6458d74c442e0f870b2394a18d32fb434db37939552fc35b6a85b9b84d0"},
-    {file = "eric_sse-1.0.0a9.tar.gz", hash = "sha256:dc8d4cd163863f6eee4cc1374193a7ed8ce487a9c84f6b1d6f80031c34c85843"},
+    {file = "eric_sse-1.0.0a10-py3-none-any.whl", hash = "sha256:467f483007849a35ed942aa0249b777241a4520fe54e05b6079e58f2c17da44a"},
+    {file = "eric_sse-1.0.0a10.tar.gz", hash = "sha256:4be46db0ac96478b2c7ab4f3b74fb8862b549209ff0d95e4918e0666a9b8bdbc"},
 ]
 
 [package.dependencies]
@@ -86,4 +86,4 @@ ocsp = ["cryptography (>=36.0.1)", "pyopenssl (==23.2.1)", "requests (>=2.31.0)"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10, <3.12"
-content-hash = "ba57ded500f7941ff2a1e001fd631714c4e22803f0eb2ad6ed0651257efe3e1a"
+content-hash = "7f41093392d926016f1ca0e3a0031ba67d4f91d2000bcda9ee24178c1bb06a27"

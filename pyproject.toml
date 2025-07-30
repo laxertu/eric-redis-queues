@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "eric-redis-queues"
 description = "Redis support for eric-sse"
-version = "1.0.0a5"
+version = "1.0.0a6"
 authors = ["Luca Stretti <laxertu@gmail.com>"]
 license = "MIT"
 readme = "README.md"
@@ -14,7 +14,7 @@ Issues = "https://github.com/laxertu/eric/issues"
 [tool.poetry.dependencies]
 python = ">=3.10, <3.12"
 redis = "^5.2.1"
-eric-sse = "^1.0.0a9"
+eric-sse = "^1.0.0a10"
 
 [build-system]
 requires = ["poetry-core"]

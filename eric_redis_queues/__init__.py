@@ -8,7 +8,7 @@ from eric_sse.exception import NoMessagesException, RepositoryError
 from eric_sse.message import MessageContract
 from eric_sse.prefabs import SSEChannel
 from eric_sse.queue import Queue
-from eric_sse.connection import Connection, ConnectionRepositoryInterface, ChannelRepositoryInterface, ObjectPersistenceMixin
+from eric_sse.connection import Connection, ConnectionRepositoryInterface, ObjectRepositoryInterface, ObjectPersistenceMixin
 
 logger = get_logger()
 
@@ -109,7 +109,7 @@ class RedisConnectionsRepository(ConnectionRepositoryInterface):
 
 
 
-class RedisSSEChannelRepository(ChannelRepositoryInterface):
+class RedisSSEChannelRepository(ObjectRepositoryInterface):
     def __init__(self, host='127.0.0.1', port=6379, db=0):
         self.__host: str = host
         self.__port: int = port

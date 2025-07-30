@@ -137,7 +137,7 @@ class RedisChannelRepository(ChannelRepositoryInterface):
 
     def persist(self, channel: ObjectPersistenceMixin):
         try:
-            self.__client.set(f'{_PREFIX_CHANNELS}:{channel.id}', json.dumps(channel.value_as_dict()))
+            self.__client.set(f'{_PREFIX_CHANNELS}:{channel.id}', json.dumps(channel.value_as_dict))
         except Exception as e:
             raise RepositoryError(e)
 

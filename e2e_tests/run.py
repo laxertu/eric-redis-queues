@@ -4,7 +4,7 @@ from eric_sse.prefabs import SSEChannel
 from eric_sse.exception import NoMessagesException, InvalidListenerException
 
 try:
-    l_id = "eric-redis-queues:l:64318db9-0736-4d79-b291-9f4f1f97f7cd".split(":")[2]
+    l_id = "eric-redis-queues:l:1497a475-bae5-42ff-b42f-882c280bf9b8".split(":")[2]
     print(l_id)
 
     ch = SSEChannel(connections_repository=RedisConnectionsRepository())

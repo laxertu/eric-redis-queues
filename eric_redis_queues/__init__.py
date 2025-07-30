@@ -1,6 +1,4 @@
-import traceback
 from typing import Iterable
-from uuid import uuid4
 from pickle import dumps, loads
 
 from redis import Redis
@@ -59,16 +57,13 @@ class RedisConnectionsRepository(AbstractConnectionRepository):
                 listener = loads(self.__client.get(key))
                 queue = self.create_queue(listener_id=listener.id)
                 yield Connection(listener=listener, queue=queue)
-            except TypeError as e:
-                #self.__client.delete(key)
-                print(e)
-                print(traceback.format_exc())
+            except Exception as e:
+                raise RepositoryError(e)
 
 
     def persist(self, connection: Connection) -> None:
         try:
             self.__client.set(f'{_PREFIX_LISTENERS}:{connection.listener.id}', dumps(connection.listener))
-            #self.__client.set(f'{_PREFIX_QUEUES}:{connection.listener.id}', dumps(connection.queue))
         except Exception as e:
             raise RepositoryError(e)
 

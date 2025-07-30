@@ -49,7 +49,7 @@ class RedisChannelRepository(ChannelRepositoryInterface):
         self.__client = Redis(host=host, port=port, db=db)
 
     def load(self) -> Iterable[AbstractChannel]:
-        for redis_key in self.__client.scan_iter(f"{_PREFIX_LISTENERS}:*"):
+        for redis_key in self.__client.scan_iter(f"{_PREFIX_CHANNELS}:*"):
             try:
                 yield loads(self.__client.get(redis_key.decode()))
             except Exception as e:

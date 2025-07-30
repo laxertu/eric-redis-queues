@@ -7,8 +7,7 @@ from eric_sse.entities import AbstractChannel
 from eric_sse.exception import NoMessagesException, RepositoryError
 from eric_sse.message import MessageContract
 from eric_sse.queue import Queue
-from eric_sse.connection import Connection, ConnectionRepositoryInterface, ChannelRepositoryInterface
-
+from eric_sse.connection import Connection, ConnectionRepositoryInterface, ChannelRepositoryInterface, ChannelInterface, ChannelPersistenceMixin
 
 _PREFIX = 'eric-redis-queues'
 _PREFIX_QUEUES = f'eric-redis-queues:q'
@@ -48,16 +47,19 @@ class RedisChannelRepository(ChannelRepositoryInterface):
         self.__db: int = db
         self.__client = Redis(host=host, port=port, db=db)
 
-    def load(self) -> Iterable[AbstractChannel]:
+    def create(self) -> ChannelInterface:
+        pass
+
+    def load(self) -> Iterable[ChannelPersistenceMixin]:
         for redis_key in self.__client.scan_iter(f"{_PREFIX_CHANNELS}:*"):
             try:
                 yield loads(self.__client.get(redis_key.decode()))
             except Exception as e:
                 raise RepositoryError(e)
 
-    def persist(self, channel: AbstractChannel):
+    def persist(self, channel: ChannelPersistenceMixin):
         try:
-            self.__client.set(f'{_PREFIX_CHANNELS}:{channel.id}', dumps(channel))
+            self.__client.set(f'{_PREFIX_CHANNELS}:{channel.key}', dumps(channel))
         except Exception as e:
             raise RepositoryError(e)
 

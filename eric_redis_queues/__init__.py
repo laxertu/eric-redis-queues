@@ -1,5 +1,5 @@
 import json
-from typing import Iterable, List
+from typing import Iterable
 from pickle import dumps, loads
 
 from redis import Redis
@@ -8,7 +8,7 @@ from eric_sse.exception import NoMessagesException, RepositoryError
 from eric_sse.message import MessageContract
 from eric_sse.prefabs import SSEChannel
 from eric_sse.queue import Queue
-from eric_sse.connection import Connection, ConnectionRepositoryInterface, ObjectRepositoryInterface, ObjectPersistenceMixin
+from eric_sse.persistence import Connection, ConnectionRepositoryInterface, ObjectRepositoryInterface, ObjectPersistenceMixin
 
 logger = get_logger()
 

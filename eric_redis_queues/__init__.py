@@ -103,15 +103,15 @@ class RedisConnectionsRepository(ConnectionRepositoryInterface):
             except Exception as e:
                 raise RepositoryError(e)
 
-    def persist(self, connection: Connection) -> None:
+    def persist(self, channel_id:str,  connection: Connection) -> None:
         try:
-            self.__client.set(f'{_PREFIX_LISTENERS}:{connection.listener.id}', dumps(connection.listener))
+            self.__client.set(f'{_PREFIX_LISTENERS}:{channel_id}:{connection.listener.id}', dumps(connection.listener))
         except Exception as e:
             raise RepositoryError(e)
 
-    def delete(self, listener_id: str):
+    def delete(self, channel_id: str, listener_id: str):
         try:
-            self.__client.delete(f'{_PREFIX_LISTENERS}:{listener_id}')
+            self.__client.delete(f'{_PREFIX_LISTENERS}:{channel_id}:{listener_id}')
         except Exception as e:
             raise RepositoryError(e)
         try:
@@ -158,5 +158,11 @@ class RedisSSEChannelRepository(ObjectRepositoryInterface):
     def delete(self, channel_id: str):
         try:
             self.__client.delete(f'{_PREFIX_CHANNELS}:{channel_id}')
+        except Exception as e:
+            raise RepositoryError(e)
+
+    def delete_listener(self, channel_id: str, listener_id: str) -> None:
+        try:
+            self.__client.delete(f'{_PREFIX_LISTENERS}:{channel_id}:{listener_id}')
         except Exception as e:
             raise RepositoryError(e)

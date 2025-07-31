@@ -9,8 +9,9 @@ from eric_sse.message import MessageContract
 from eric_sse.prefabs import SSEChannel
 from eric_sse.queues import Queue
 from eric_sse.persistence import (
-    Connection, ConnectionRepositoryInterface, ObjectRepositoryInterface, ObjectAsKeyValuePersistenceMixin
+    ConnectionRepositoryInterface, ObjectRepositoryInterface, ObjectAsKeyValuePersistenceMixin
 )
+from eric_sse.connection import Connection
 
 logger = get_logger()
 

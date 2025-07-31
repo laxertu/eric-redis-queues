@@ -3,6 +3,6 @@ Redis support for eric-sse
 Example of usage:
 
     from eric_sse.prefabs import SSEChannel
-    from eric_redis_queues.eric_redis_queues import RedisQueueFactory
+    from eric_redis_queues import RedisConnectionsRepository
     
-    c = SSEChannel(queues_factory=RedisQueueFactory())
+    c = SSEChannel(connections_repository=RedisConnectionsRepository())

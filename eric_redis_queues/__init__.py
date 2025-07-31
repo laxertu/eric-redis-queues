@@ -8,7 +8,9 @@ from eric_sse.exception import NoMessagesException, RepositoryError
 from eric_sse.message import MessageContract
 from eric_sse.prefabs import SSEChannel
 from eric_sse.queues import Queue
-from eric_sse.persistence import Connection, ConnectionRepositoryInterface, ObjectRepositoryInterface, ObjectAsKeyValuePersistenceMixin
+from eric_sse.persistence import (
+    Connection, ConnectionRepositoryInterface, ObjectRepositoryInterface, ObjectAsKeyValuePersistenceMixin
+)
 
 logger = get_logger()
 
@@ -53,11 +55,11 @@ class RedisQueue(Queue, ObjectAsKeyValuePersistenceMixin):
 
     def pop(self) -> MessageContract:
 
-        if not self.__client.exists(f'{_PREFIX_QUEUES}:{self.id}'):
+        if not self.__client.exists(f'{_PREFIX_QUEUES}:{self.kv_key}'):
             raise NoMessagesException
 
         try:
-            raw_value = self.__client.lpop(f'{_PREFIX_QUEUES}:{self.id}')
+            raw_value = self.__client.lpop(f'{_PREFIX_QUEUES}:{self.kv_key}')
             return loads(raw_value)
 
         except Exception as e:
@@ -66,7 +68,7 @@ class RedisQueue(Queue, ObjectAsKeyValuePersistenceMixin):
 
     def push(self, msg: MessageContract) -> None:
         try:
-            self.__client.rpush(f'{_PREFIX_QUEUES}:{self.id}', dumps(msg))
+            self.__client.rpush(f'{_PREFIX_QUEUES}:{self.kv_key}', dumps(msg))
         except Exception as e:
             raise RepositoryError(e)
 

@@ -111,12 +111,17 @@ class RedisConnectionsRepository(ConnectionRepositoryInterface):
             raise RepositoryError(e)
 
     def delete(self, channel_id: str, listener_id: str):
+
         try:
+            key = f'{_PREFIX_LISTENERS}:{channel_id}:{listener_id}'
+            print(f'deletingggggggg {key}')
             self.__client.delete(f'{_PREFIX_LISTENERS}:{channel_id}:{listener_id}')
         except Exception as e:
             raise RepositoryError(e)
         try:
-            self.__client.delete(f'{_PREFIX_QUEUES}:{listener_id}')
+            key = f'{_PREFIX_QUEUES}:{listener_id}'
+            print(f'deleting {key}')
+            self.__client.delete(key)
         except Exception as e:
             raise RepositoryError(e)
 
@@ -158,10 +163,8 @@ class RedisSSEChannelRepository(ChannelRepositoryInterface):
 
     def delete(self, key: str):
         try:
-            print('FFFFFFFFFFFFFFFFFFF')
             for listener_key in self.__client.scan_iter(f"{_PREFIX_LISTENERS}:{key}:*"):
-                print("LLLLLLLLLLLLL", listener_key)
-                self.__connections_repository.delete(channel_id=key, listener_id=listener_key.decode().split(':')[2])
+                self.__connections_repository.delete(channel_id=key, listener_id=listener_key.decode().split(':')[3])
 
             self.__client.delete(f'{_PREFIX_CHANNELS}:{key}')
         except Exception as e:

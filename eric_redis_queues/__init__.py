@@ -83,7 +83,7 @@ class RedisConnectionsRepository(ConnectionRepositoryInterface):
     def create_queue(self, listener_id: str) -> Queue:
         return RedisQueue(listener_id= listener_id, host=self.__host, port=self.__port, db=self.__db)
 
-    def load(self) -> Iterable[Connection]:
+    def load_all(self) -> Iterable[Connection]:
         for redis_key in self.__client.scan_iter(f"{_PREFIX_LISTENERS}:*"):
             key = redis_key.decode()
             try:
@@ -93,6 +93,15 @@ class RedisConnectionsRepository(ConnectionRepositoryInterface):
             except Exception as e:
                 raise RepositoryError(e)
 
+    def load(self, channel_id: str) -> Iterable[Connection]:
+        for redis_key in self.__client.scan_iter(f"{_PREFIX_LISTENERS}:{channel_id}:*"):
+            key = redis_key.decode()
+            try:
+                listener = loads(self.__client.get(key))
+                queue = self.create_queue(listener_id=listener.id)
+                yield Connection(listener=listener, queue=queue)
+            except Exception as e:
+                raise RepositoryError(e)
 
     def persist(self, connection: Connection) -> None:
         try:
@@ -119,6 +128,8 @@ class RedisSSEChannelRepository(ObjectRepositoryInterface):
         self.__db: int = db
         self.__client = Redis(host=host, port=port, db=db)
 
+        self.__connections_repository = RedisConnectionsRepository(host=host, port=port, db=db)
+
     def load(self) -> Iterable[SSEChannel]:
         try:
             connections_repository = RedisConnectionsRepository(host=self.__host, port=self.__port, db=self.__db)
@@ -128,7 +139,7 @@ class RedisSSEChannelRepository(ObjectRepositoryInterface):
                     channel_construction_params: dict[str] = json.loads(self.__client.get(key))
                     channel = SSEChannel(**channel_construction_params, connections_repository=connections_repository)
 
-                    for connection in connections_repository.load():
+                    for connection in connections_repository.load(channel.kv_key):
                         channel.register_connection(listener=connection.listener, queue=connection.queue)
 
                     yield channel

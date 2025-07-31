@@ -9,7 +9,8 @@ from eric_sse.message import MessageContract
 from eric_sse.prefabs import SSEChannel
 from eric_sse.queues import Queue
 from eric_sse.persistence import (
-    ConnectionRepositoryInterface, ObjectRepositoryInterface, ObjectAsKeyValuePersistenceMixin
+    ConnectionRepositoryInterface, ObjectRepositoryInterface, ObjectAsKeyValuePersistenceMixin,
+    ChannelRepositoryInterface
 )
 from eric_sse.connection import Connection
 
@@ -121,7 +122,7 @@ class RedisConnectionsRepository(ConnectionRepositoryInterface):
 
 
 
-class RedisSSEChannelRepository(ObjectRepositoryInterface):
+class RedisSSEChannelRepository(ChannelRepositoryInterface):
     def __init__(self, host='127.0.0.1', port=6379, db=0):
         self.__host: str = host
         self.__port: int = port
@@ -149,15 +150,15 @@ class RedisSSEChannelRepository(ObjectRepositoryInterface):
         except Exception as e:
             raise RepositoryError(e)
 
-    def persist(self, channel: SSEChannel):
+    def persist(self, persistable: SSEChannel):
         try:
-            self.__client.set(f'{_PREFIX_CHANNELS}:{channel.id}', json.dumps(channel.kv_value_as_dict))
+            self.__client.set(f'{_PREFIX_CHANNELS}:{persistable.id}', json.dumps(persistable.kv_value_as_dict))
         except Exception as e:
             raise RepositoryError(e)
 
-    def delete(self, channel_id: str):
+    def delete(self, key: str):
         try:
-            self.__client.delete(f'{_PREFIX_CHANNELS}:{channel_id}')
+            self.__client.delete(f'{_PREFIX_CHANNELS}:{key}')
         except Exception as e:
             raise RepositoryError(e)
 

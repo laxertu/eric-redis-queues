@@ -158,6 +158,11 @@ class RedisSSEChannelRepository(ChannelRepositoryInterface):
 
     def delete(self, key: str):
         try:
+            print('FFFFFFFFFFFFFFFFFFF')
+            for listener_key in self.__client.scan_iter(f"{_PREFIX_LISTENERS}:{key}:*"):
+                print("LLLLLLLLLLLLL", listener_key)
+                self.__connections_repository.delete(channel_id=key, listener_id=listener_key.decode().split(':')[2])
+
             self.__client.delete(f'{_PREFIX_CHANNELS}:{key}')
         except Exception as e:
             raise RepositoryError(e)

@@ -7,7 +7,7 @@ from eric_sse import get_logger
 from eric_sse.exception import NoMessagesException, RepositoryError
 from eric_sse.message import MessageContract
 from eric_sse.prefabs import SSEChannel
-from eric_sse.queue import Queue
+from eric_sse.queues import Queue
 from eric_sse.persistence import Connection, ConnectionRepositoryInterface, ObjectRepositoryInterface, ObjectPersistenceMixin
 
 logger = get_logger()

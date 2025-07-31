@@ -8,7 +8,7 @@ from eric_sse.exception import NoMessagesException, RepositoryError
 from eric_sse.message import MessageContract
 from eric_sse.prefabs import SSEChannel
 from eric_sse.queues import Queue
-from eric_sse.persistence import Connection, ConnectionRepositoryInterface, ObjectRepositoryInterface, ObjectPersistenceMixin
+from eric_sse.persistence import Connection, ConnectionRepositoryInterface, ObjectRepositoryInterface, ObjectAsKeyValuePersistenceMixin
 
 logger = get_logger()
 
@@ -17,7 +17,7 @@ _PREFIX_QUEUES = f'eric-redis-queues:q'
 _PREFIX_LISTENERS = f'eric-redis-queues:l'
 _PREFIX_CHANNELS = f'eric-redis-queues:c'
 
-class RedisQueue(Queue, ObjectPersistenceMixin):
+class RedisQueue(Queue, ObjectAsKeyValuePersistenceMixin):
 
     def __init__(self, listener_id: str, host='127.0.0.1', port=6379, db=0):
         self.__id: str | None = None
@@ -36,11 +36,11 @@ class RedisQueue(Queue, ObjectPersistenceMixin):
         })
 
     @property
-    def id(self) -> str:
+    def kv_key(self) -> str:
         return self.__id
 
     @property
-    def value_as_dict(self):
+    def kv_value_as_dict(self):
         return self.__value_as_dict
 
     def setup_by_dict(self, setup: dict):
@@ -137,7 +137,7 @@ class RedisSSEChannelRepository(ObjectRepositoryInterface):
 
     def persist(self, channel: SSEChannel):
         try:
-            self.__client.set(f'{_PREFIX_CHANNELS}:{channel.id}', json.dumps(channel.value_as_dict))
+            self.__client.set(f'{_PREFIX_CHANNELS}:{channel.id}', json.dumps(channel.kv_value_as_dict))
         except Exception as e:
             raise RepositoryError(e)
 

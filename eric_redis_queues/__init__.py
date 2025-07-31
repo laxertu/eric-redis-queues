@@ -9,7 +9,7 @@ from eric_sse.message import MessageContract
 from eric_sse.prefabs import SSEChannel
 from eric_sse.queues import Queue
 from eric_sse.persistence import (
-    ConnectionRepositoryInterface, ObjectRepositoryInterface, ObjectAsKeyValuePersistenceMixin,
+    ConnectionRepositoryInterface, PersistableQueue,
     ChannelRepositoryInterface
 )
 from eric_sse.connection import Connection
@@ -21,7 +21,7 @@ _PREFIX_QUEUES = f'eric-redis-queues:q'
 _PREFIX_LISTENERS = f'eric-redis-queues:l'
 _PREFIX_CHANNELS = f'eric-redis-queues:c'
 
-class RedisQueue(Queue, ObjectAsKeyValuePersistenceMixin):
+class RedisQueue(PersistableQueue):
 
     def __init__(self, listener_id: str, host='127.0.0.1', port=6379, db=0):
         self.__id: str | None = None

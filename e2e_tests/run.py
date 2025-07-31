@@ -1,12 +1,14 @@
 import sys
-from eric_redis_queues import RedisChannel
+from eric_redis_queues import RedisConnectionsRepository
+from eric_sse.prefabs import SSEChannel
 from eric_sse.exception import NoMessagesException, InvalidListenerException
 
 try:
     l_id = sys.argv[1]
 
-    ch = RedisChannel()
-    ch.get_listener(listener_id=l_id).start_sync()
+    ch = SSEChannel(connections_repository=RedisConnectionsRepository())
+    ch.open()
+    ch.get_listener(listener_id=l_id).start()
 
 except IndexError:
     print("Usage: python run.py <listener id>")

@@ -1,4 +1,4 @@
-from eric_redis_queues import RedisConnectionsRepository
+from eric_redis_queues import RedisConnectionsRepository, RedisSSEChannelRepository
 from eric_sse.message import SignedMessage, UniqueMessage, Message
 from eric_sse.prefabs import SSEChannel
 repo = RedisConnectionsRepository()
@@ -13,3 +13,6 @@ print(f'python run.py {ch.id} {l.id}')
 ch.broadcast(sm)
 ch.broadcast(um)
 ch.broadcast(m)
+
+repo_persist = RedisSSEChannelRepository()
+repo_persist.persist(ch)

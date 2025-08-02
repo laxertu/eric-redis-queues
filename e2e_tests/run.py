@@ -8,7 +8,7 @@ try:
     repo = RedisSSEChannelRepository()
     channels = {ch.id: ch for ch in repo.load()}
     ch = channels[channel_id]
-    ch.open()
+    ch.load_persisted_data()
     ch.get_listener(listener_id=l_id).start()
 
     while True:

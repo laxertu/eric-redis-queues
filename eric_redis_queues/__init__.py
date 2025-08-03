@@ -1,8 +1,7 @@
-import dataclasses
 import json
 from abc import ABC
 from typing import Iterable, Any
-from pickle import dumps, loads, UnpicklingError
+from pickle import dumps, loads
 
 from redis import Redis
 from eric_sse import get_logger
@@ -15,7 +14,6 @@ from eric_sse.persistence import (
     ChannelRepositoryInterface
 )
 from eric_sse.connection import Connection
-from eric_sse.persistence import InMemoryQueue
 
 logger = get_logger()
 
@@ -82,35 +80,10 @@ class RedisQueue(AbstractRedisQueue):
 
 class BlockingRedisQueue(RedisQueue):
 
-    def __init__(self, listener_id: str, host='127.0.0.1', port=6379, db=0):
-
-        super().__init__(listener_id, host, port, db)
-        self.__pending_messages_queue: InMemoryQueue = InMemoryQueue()
-
-
-    def _update_pending_messages_queue(self):
-        while True:
-            try:
-                self.__pending_messages_queue.push(super().pop())
-            except NoMessagesException:
-                break
-
-
     def pop(self) -> Any | None:
-        self._update_pending_messages_queue()
-        try:
-            return self.__pending_messages_queue.pop()
-        except NoMessagesException:
-            for raw_value in self._client.blpop([f'{_PREFIX_QUEUES}:{self.kv_key}']):
-                try:
-                    return loads(raw_value)
-                except UnpicklingError as e:
-                    logger.error(repr(e))
-                    raise RepositoryError(e)
 
-        except Exception as e:
-            raise RepositoryError(e)
-
+        k, v = self._client.blpop([f'{_PREFIX_QUEUES}:{self.kv_key}'])
+        return loads(bytes(v))
 
 class RedisConnectionsRepository(ConnectionRepositoryInterface):
     def __init__(self, host='127.0.0.1', port=6379, db=0):

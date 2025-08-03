@@ -1,5 +1,6 @@
 import json
-from typing import Iterable
+from abc import ABC
+from typing import Iterable, Any
 from pickle import dumps, loads
 
 from redis import Redis
@@ -21,11 +22,11 @@ _PREFIX_QUEUES = f'eric-redis-queues:q'
 _PREFIX_LISTENERS = f'eric-redis-queues:l'
 _PREFIX_CHANNELS = f'eric-redis-queues:c'
 
-class RedisQueue(PersistableQueue):
+class AbstractRedisQueue(PersistableQueue, ABC):
 
     def __init__(self, listener_id: str, host='127.0.0.1', port=6379, db=0):
         self.__id: str | None = None
-        self.__client: Redis | None = None
+        self._client: Redis | None = None
 
         self.__host: str | None = None
         self.__port: int | None = None
@@ -53,16 +54,19 @@ class RedisQueue(PersistableQueue):
         self.__port = setup['port']
         self.__db = setup['db']
         self.__value_as_dict.update(setup)
-        self.__client = Redis(host=self.__host, port=self.__port, db=self.__db)
+        self._client = Redis(host=self.__host, port=self.__port, db=self.__db)
 
-    def pop(self) -> MessageContract:
+class RedisQueue(AbstractRedisQueue):
 
-        if not self.__client.exists(f'{_PREFIX_QUEUES}:{self.kv_key}'):
+
+    def pop(self) -> Any | None:
+
+        if not self._client.exists(f'{_PREFIX_QUEUES}:{self.kv_key}'):
             raise NoMessagesException
 
         try:
-            raw_value = self.__client.lpop(f'{_PREFIX_QUEUES}:{self.kv_key}')
-            return loads(raw_value)
+            raw_value = self._client.lpop(f'{_PREFIX_QUEUES}:{self.kv_key}')
+            return loads(bytes(raw_value))
 
         except Exception as e:
             raise RepositoryError(e)
@@ -70,9 +74,16 @@ class RedisQueue(PersistableQueue):
 
     def push(self, msg: MessageContract) -> None:
         try:
-            self.__client.rpush(f'{_PREFIX_QUEUES}:{self.kv_key}', dumps(msg))
+            self._client.rpush(f'{_PREFIX_QUEUES}:{self.kv_key}', dumps(msg))
         except Exception as e:
             raise RepositoryError(e)
+
+class BlockingRedisQueue(RedisQueue):
+
+    def pop(self) -> Any | None:
+
+        k, v = self._client.blpop([f'{_PREFIX_QUEUES}:{self.kv_key}'])
+        return loads(bytes(v))
 
 class RedisConnectionsRepository(ConnectionRepositoryInterface):
     def __init__(self, host='127.0.0.1', port=6379, db=0):

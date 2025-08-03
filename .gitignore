@@ -1,2 +1,9 @@
 /dist/
 /.idea/workspace.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/.gitignore
+/.idea/eric-redis-queues.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/vcs.xml

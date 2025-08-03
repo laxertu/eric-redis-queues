@@ -122,6 +122,7 @@ class RedisConnectionsRepository(ConnectionRepositoryInterface):
             raise RepositoryError(e)
 
     def delete(self, channel_id: str, listener_id: str):
+        """Deletes a listener given its channel id and listener id."""
 
         try:
             self.__client.delete(f'{_PREFIX_LISTENERS}:{channel_id}:{listener_id}')
@@ -145,6 +146,7 @@ class RedisSSEChannelRepository(ChannelRepositoryInterface):
         self.__connections_repository = RedisConnectionsRepository(host=host, port=port, db=db)
 
     def load(self) -> Iterable[SSEChannel]:
+        """Returns all channels from the repository."""
         try:
             connections_repository = RedisConnectionsRepository(host=self.__host, port=self.__port, db=self.__db)
             for redis_key in self.__client.scan_iter(f"{_PREFIX_CHANNELS}:*"):

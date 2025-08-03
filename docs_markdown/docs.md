@@ -1,4 +1,4 @@
-# Eric Redis Queues
+# Reference
 
 ### *class* AbstractRedisQueue
 

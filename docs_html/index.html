@@ -43,7 +43,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Eric Redis Queues" href="docs.html" />
+    <link rel="next" title="Reference" href="docs.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -150,7 +150,7 @@
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="docs.html">Eric Redis Queues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docs.html">Reference</a></li>
 </ul>
 
     </div>
@@ -302,10 +302,16 @@ document.write(`
                   
   <section id="eric-redis-queues-documentation">
 <h1>Eric Redis queues documentation<a class="headerlink" href="#eric-redis-queues-documentation" title="Link to this heading">#</a></h1>
-<p>Adds Redis persistence support to eric-sse</p>
+<p>Redis support for eric-sse <a class="reference external" href="https://laxertu.github.io/eric">https://laxertu.github.io/eric</a></p>
+<p>Example of usage:</p>
+<blockquote>
+<div><p>from eric_sse.prefabs import SSEChannel</p>
+<p>from eric_redis_queues import RedisConnectionsRepository</p>
+<p>c = SSEChannel(connections_repository=RedisConnectionsRepository())</p>
+</div></blockquote>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="docs.html">Eric Redis Queues</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="docs.html">Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="docs.html#eric_redis_queues.AbstractRedisQueue"><code class="docutils literal notranslate"><span class="pre">AbstractRedisQueue</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="docs.html#eric_redis_queues.RedisQueue"><code class="docutils literal notranslate"><span class="pre">RedisQueue</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="docs.html#eric_redis_queues.BlockingRedisQueue"><code class="docutils literal notranslate"><span class="pre">BlockingRedisQueue</span></code></a></li>
@@ -333,7 +339,7 @@ document.write(`
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Eric Redis Queues</p>
+        <p class="prev-next-title">Reference</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

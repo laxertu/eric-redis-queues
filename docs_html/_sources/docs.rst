@@ -1,6 +1,6 @@
 
-Eric Redis Queues
-=================
+Reference
+=========
 .. automodule:: eric_redis_queues
     :undoc-members:
     :members: AbstractRedisQueue, RedisQueue, BlockingRedisQueue, RedisConnectionsRepository, RedisSSEChannelRepository

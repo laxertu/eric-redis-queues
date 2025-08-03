@@ -37,6 +37,10 @@ Raises a `eric_sse.exception.NoMessagesException` if the queue is empty.
 
 ### *class* BlockingRedisQueue
 
+Implements a blocking queue.
+
+pop() behaviour relies on [https://redis.io/docs/latest/commands/blpop/](https://redis.io/docs/latest/commands/blpop/)
+
 #### pop()
 
 Next message from the queue.

@@ -79,6 +79,11 @@ class RedisQueue(AbstractRedisQueue):
             raise RepositoryError(e)
 
 class BlockingRedisQueue(RedisQueue):
+    """
+    Implements a blocking queue.
+
+    pop() behaviour relies on https://redis.io/docs/latest/commands/blpop/
+    """
 
     def pop(self) -> Any | None:
 

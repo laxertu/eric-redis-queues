@@ -396,7 +396,9 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="eric_redis_queues.BlockingRedisQueue">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BlockingRedisQueue</span></span><a class="headerlink" href="#eric_redis_queues.BlockingRedisQueue" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
+<dd><p>Implements a blocking queue.</p>
+<p>pop() behaviour relies on <a class="reference external" href="https://redis.io/docs/latest/commands/blpop/">https://redis.io/docs/latest/commands/blpop/</a></p>
+<dl class="py method">
 <dt class="sig sig-object py" id="eric_redis_queues.BlockingRedisQueue.pop">
 <span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.BlockingRedisQueue.pop" title="Link to this definition">#</a></dt>
 <dd><p>Next message from the queue.</p>

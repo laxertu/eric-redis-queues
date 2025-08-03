@@ -1,20 +1,34 @@
-from eric_redis_queues import RedisConnectionsRepository, RedisSSEChannelRepository
+from eric_redis_queues import (
+    AbstractRedisConnectionRepository, RedisConnectionsRepository, RedisBlockingQueuesRepository,
+    RedisSSEChannelRepository
+)
 from eric_sse.message import SignedMessage, UniqueMessage, Message
 from eric_sse.prefabs import SSEChannel
-repo = RedisConnectionsRepository()
 
-ch = SSEChannel(connections_repository=RedisConnectionsRepository())
+repo_1 = RedisConnectionsRepository()
+repo_2 = RedisBlockingQueuesRepository()
 
-sm = SignedMessage(sender_id='admin', msg_type='test', msg_payload='hi there')
-um = UniqueMessage(message_id='mgs_id0001', sender_id='administrator', message=Message(msg_type='test2', msg_payload={'a': 1}))
-m = Message(msg_type='testsimple', msg_payload='hi, simple')
-l = ch.add_listener()
-print("")
-print(f'python run.py {ch.id} {l.id}')
-print("")
-ch.broadcast(sm)
-ch.broadcast(um)
-ch.broadcast(m)
 
-repo_persist = RedisSSEChannelRepository()
-repo_persist.persist(ch)
+def do_test(r: AbstractRedisConnectionRepository):
+    ch = SSEChannel(connections_repository=r)
+
+    sm = SignedMessage(sender_id='admin', msg_type='test', msg_payload='hi there')
+    um = UniqueMessage(message_id='mgs_id0001', sender_id='administrator',
+                       message=Message(msg_type='test2', msg_payload={'a': 1}))
+    m = Message(msg_type='testsimple', msg_payload='hi, simple')
+    l = ch.add_listener()
+    print("")
+    print(f'python run.py {ch.id} {l.id}')
+    print("")
+    ch.broadcast(sm)
+    ch.broadcast(um)
+    ch.broadcast(m)
+
+    repo_persist = RedisSSEChannelRepository()
+    repo_persist.persist(ch)
+
+print("Default")
+do_test(repo_1)
+print("Blocking")
+do_test(repo_2)
+

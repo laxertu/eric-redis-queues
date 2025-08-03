@@ -1,3 +1,4 @@
+import abc
 import json
 from abc import ABC
 from typing import Iterable, Any
@@ -90,31 +91,32 @@ class BlockingRedisQueue(RedisQueue):
         k, v = self._client.blpop([f'{_PREFIX_QUEUES}:{self.kv_key}'])
         return loads(bytes(v))
 
-class RedisConnectionsRepository(ConnectionRepositoryInterface):
+class AbstractRedisConnectionRepository(ConnectionRepositoryInterface, ABC):
     def __init__(self, host='127.0.0.1', port=6379, db=0):
-        self.__host: str = host
-        self.__port: int = port
-        self.__db: int = db
-        self.__client = Redis(host=host, port=port, db=db)
+        self._host: str = host
+        self._port: int = port
+        self._db: int = db
+        self._client = Redis(host=host, port=port, db=db)
 
-    def create_queue(self, listener_id: str) -> Queue:
-        return RedisQueue(listener_id= listener_id, host=self.__host, port=self.__port, db=self.__db)
+    @abc.abstractmethod
+    def create_queue(self, listener_id: str) -> AbstractRedisQueue:
+        ...
 
     def load_all(self) -> Iterable[Connection]:
-        for redis_key in self.__client.scan_iter(f"{_PREFIX_LISTENERS}:*"):
+        for redis_key in self._client.scan_iter(f"{_PREFIX_LISTENERS}:*"):
             key = redis_key.decode()
             try:
-                listener = loads(self.__client.get(key))
+                listener = loads(self._client.get(key))
                 queue = self.create_queue(listener_id=listener.id)
                 yield Connection(listener=listener, queue=queue)
             except Exception as e:
                 raise RepositoryError(e)
 
     def load(self, channel_id: str) -> Iterable[Connection]:
-        for redis_key in self.__client.scan_iter(f"{_PREFIX_LISTENERS}:{channel_id}:*"):
+        for redis_key in self._client.scan_iter(f"{_PREFIX_LISTENERS}:{channel_id}:*"):
             key = redis_key.decode()
             try:
-                listener = loads(self.__client.get(key))
+                listener = loads(self._client.get(key))
                 queue = self.create_queue(listener_id=listener.id)
                 yield Connection(listener=listener, queue=queue)
             except Exception as e:
@@ -122,7 +124,7 @@ class RedisConnectionsRepository(ConnectionRepositoryInterface):
 
     def persist(self, channel_id:str,  connection: Connection) -> None:
         try:
-            self.__client.set(f'{_PREFIX_LISTENERS}:{channel_id}:{connection.listener.id}', dumps(connection.listener))
+            self._client.set(f'{_PREFIX_LISTENERS}:{channel_id}:{connection.listener.id}', dumps(connection.listener))
         except Exception as e:
             raise RepositoryError(e)
 
@@ -130,15 +132,24 @@ class RedisConnectionsRepository(ConnectionRepositoryInterface):
         """Deletes a listener given its channel id and listener id."""
 
         try:
-            self.__client.delete(f'{_PREFIX_LISTENERS}:{channel_id}:{listener_id}')
+            self._client.delete(f'{_PREFIX_LISTENERS}:{channel_id}:{listener_id}')
         except Exception as e:
             raise RepositoryError(e)
         try:
             key = f'{_PREFIX_QUEUES}:{listener_id}'
-            self.__client.delete(key)
+            self._client.delete(key)
         except Exception as e:
             raise RepositoryError(e)
 
+class RedisConnectionsRepository(AbstractRedisConnectionRepository):
+
+    def create_queue(self, listener_id: str) -> AbstractRedisQueue:
+        return RedisQueue(listener_id= listener_id, host=self._host, port=self._port, db=self._db)
+
+class RedisBlockingQueuesRepository(AbstractRedisConnectionRepository):
+
+    def create_queue(self, listener_id: str) -> AbstractRedisQueue:
+        return BlockingRedisQueue(listener_id= listener_id, host=self._host, port=self._port, db=self._db)
 
 
 class RedisSSEChannelRepository(ChannelRepositoryInterface):

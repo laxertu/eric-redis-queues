@@ -1,7 +1,8 @@
 Eric Redis queues documentation
 ===============================
 
-Redis support for eric-sse https://laxertu.github.io/eric
+A Redis implementation of persistence layer of eric-sse: https://laxertu.github.io/eric/docs.html#persistence
+
 
 Example of usage:
 

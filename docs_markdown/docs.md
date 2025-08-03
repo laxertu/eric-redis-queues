@@ -1,3 +1,5 @@
+A Redis implementation of persistence layer of eric-sse: [https://laxertu.github.io/eric/docs.html#persistence](https://laxertu.github.io/eric/docs.html#persistence)
+
 # Reference
 
 ### *class* AbstractRedisQueue

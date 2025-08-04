@@ -22,8 +22,8 @@ _PREFIX_QUEUES = f'eric-redis-queues:q'
 _PREFIX_LISTENERS = f'eric-redis-queues:l'
 _PREFIX_CHANNELS = f'eric-redis-queues:c'
 
-CONNECTION_REPOSITORY_DEFAULT = 'RedisConnectionsRepository'
-CONNECTION_REPOSITORY_BLOCKING = 'RedisBlockingQueuesRepository'
+CONNECTION_REPOSITORY_DEFAULT = 'eric_redis_queues.RedisConnectionsRepository'
+CONNECTION_REPOSITORY_BLOCKING = 'eric_redis_queues.RedisBlockingQueuesRepository'
 
 
 class AbstractRedisQueue(PersistableQueue, ABC):
@@ -59,6 +59,16 @@ class AbstractRedisQueue(PersistableQueue, ABC):
         self.__db = setup['db']
         self.__value_as_dict.update(setup)
         self._client = Redis(host=self.__host, port=self.__port, db=self.__db)
+
+    @property
+    def kv_constructor_params_as_dict(self) -> dict:
+        return {
+            'listener_id': self.__id,
+            'host': self.__host,
+            'port': self.__port,
+            'db': self.__db,
+        }
+
 
 class RedisQueue(AbstractRedisQueue):
 

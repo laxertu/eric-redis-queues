@@ -30,7 +30,7 @@ Does de necessary setup of object given its persisted values
 
 Next message from the queue.
 
-Raises a `eric_sse.exception.NoMessagesException` if the queue is empty.
+Raises a `NoMessagesException` if the queue is empty.
 
 * **Return type:**
   *Any* | None
@@ -39,20 +39,18 @@ Raises a `eric_sse.exception.NoMessagesException` if the queue is empty.
 
 Implements a blocking queue.
 
-pop() behaviour relies on [https://redis.io/docs/latest/commands/blpop/](https://redis.io/docs/latest/commands/blpop/)
+**pop()** behaviour relies on [https://redis.io/docs/latest/commands/blpop/](https://redis.io/docs/latest/commands/blpop/) , so pop calls with block program execution until a new message is pushed.
 
 #### pop()
 
 Next message from the queue.
 
-Raises a `eric_sse.exception.NoMessagesException` if the queue is empty.
+Raises a `NoMessagesException` if the queue is empty.
 
 * **Return type:**
   *Any* | None
 
 ### *class* RedisConnectionsRepository
-
-#### \_\_init_\_(host='127.0.0.1', port=6379, db=0)
 
 #### create_queue(listener_id)
 
@@ -61,35 +59,17 @@ Returns a concrete Queue instance.
 * **Parameters:**
   **listener_id** (*str*) – Corresponding listener id
 * **Return type:**
-  *Queue*
-
-#### load_all()
-
-Returns an Iterable of all persisted connections
-
-* **Return type:**
-  *Iterable*[*Connection*]
-
-#### load(channel_id)
-
-Returns an Iterable of all persisted connections of a given channel
-
-* **Parameters:**
-  **channel_id** (*str*)
-* **Return type:**
-  *Iterable*[*Connection*]
-
-#### delete(channel_id, listener_id)
-
-Deletes a listener given its channel id and listener id.
-
-* **Parameters:**
-  * **channel_id** (*str*)
-  * **listener_id** (*str*)
+  [*AbstractRedisQueue*](#eric_redis_queues.AbstractRedisQueue)
 
 ### *class* RedisSSEChannelRepository
 
-#### \_\_init_\_(host='127.0.0.1', port=6379, db=0)
+#### \_\_init_\_(host='127.0.0.1', port=6379, db=0, connection_factory='RedisConnectionsRepository')
+
+* **Parameters:**
+  * **host**
+  * **port**
+  * **db**
+  * **connection_factory** (*str*) – Connection factory name to use to connect to Redis. Accepted literals are **‘RedisConnectionsRepository’** and **‘RedisBlockingQueuesRepository’**
 
 #### load()
 

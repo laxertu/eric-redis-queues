@@ -9,7 +9,6 @@ from eric_sse import get_logger
 from eric_sse.exception import NoMessagesException, RepositoryError
 from eric_sse.message import MessageContract
 from eric_sse.prefabs import SSEChannel
-from eric_sse.queues import Queue
 from eric_sse.persistence import (
     ConnectionRepositoryInterface, PersistableQueue,
     ChannelRepositoryInterface
@@ -87,7 +86,7 @@ class BlockingRedisQueue(RedisQueue):
     """
     Implements a blocking queue.
 
-    pop() behaviour relies on https://redis.io/docs/latest/commands/blpop/
+    **pop()** behaviour relies on https://redis.io/docs/latest/commands/blpop/ , so pop calls with block program execution until a new message is pushed.
     """
 
     def pop(self) -> Any | None:
@@ -163,6 +162,12 @@ class RedisSSEChannelRepository(ChannelRepositoryInterface):
             self, host='127.0.0.1', port=6379, db=0,
             connection_factory: str = CONNECTION_REPOSITORY_DEFAULT
     ):
+        """
+        :param host:
+        :param port:
+        :param db:
+        :param connection_factory: Connection factory name to use to connect to Redis. Accepted literals are **'RedisConnectionsRepository'** and **'RedisBlockingQueuesRepository'**
+        """
         self.__host: str = host
         self.__port: int = port
         self.__db: int = db

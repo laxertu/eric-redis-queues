@@ -355,7 +355,7 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisQueue">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractRedisQueue</span></span><a class="headerlink" href="#eric_redis_queues.AbstractRedisQueue" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PersistableQueue</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dd><p>Bases: <a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.persistence.PersistableQueue" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PersistableQueue</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisQueue.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">listener_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6379</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.AbstractRedisQueue.__init__" title="Link to this definition">#</a></dt>
@@ -399,7 +399,7 @@ document.write(`
 <dt class="sig sig-object py" id="eric_redis_queues.RedisQueue.pop">
 <span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.RedisQueue.pop" title="Link to this definition">#</a></dt>
 <dd><p>Next message from the queue.</p>
-<p>Raises a <code class="xref py py-class docutils literal notranslate"><span class="pre">NoMessagesException</span></code> if the queue is empty.</p>
+<p>Raises a <a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.exception.NoMessagesException" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoMessagesException</span></code></a> if the queue is empty.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><em>Any</em> | None</p>
@@ -430,7 +430,7 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisConnectionRepository">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractRedisConnectionRepository</span></span><a class="headerlink" href="#eric_redis_queues.AbstractRedisConnectionRepository" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ConnectionRepositoryInterface</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dd><p>Bases: <a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.persistence.ConnectionRepositoryInterface" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConnectionRepositoryInterface</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisConnectionRepository.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6379</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.AbstractRedisConnectionRepository.__init__" title="Link to this definition">#</a></dt>
@@ -456,7 +456,7 @@ document.write(`
 <dd><p>Returns an Iterable of all persisted connections</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>Iterable</em>[<em>Connection</em>]</p>
+<dd class="field-odd"><p><em>Iterable</em>[<a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.connection.Connection" title="(in eric-sse)"><em>Connection</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -470,7 +470,7 @@ document.write(`
 <dd class="field-odd"><p><strong>channel_id</strong> (<em>str</em>)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>Iterable</em>[<em>Connection</em>]</p>
+<dd class="field-even"><p><em>Iterable</em>[<a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.connection.Connection" title="(in eric-sse)"><em>Connection</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -534,7 +534,7 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="eric_redis_queues.RedisSSEChannelRepository">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RedisSSEChannelRepository</span></span><a class="headerlink" href="#eric_redis_queues.RedisSSEChannelRepository" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ChannelRepositoryInterface</span></code></p>
+<dd><p>Bases: <a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.persistence.ChannelRepositoryInterface" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChannelRepositoryInterface</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="eric_redis_queues.RedisSSEChannelRepository.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6379</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection_factory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RedisConnectionsRepository'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.RedisSSEChannelRepository.__init__" title="Link to this definition">#</a></dt>
@@ -556,7 +556,7 @@ document.write(`
 <dd><p>Returns all channels from the repository.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>Iterable</em>[<em>SSEChannel</em>]</p>
+<dd class="field-odd"><p><em>Iterable</em>[<a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.prefabs.SSEChannel" title="(in eric-sse)"><em>SSEChannel</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>

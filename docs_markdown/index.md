@@ -6,7 +6,7 @@ A Redis implementation of persistence layer of eric-sse: [https://laxertu.github
 
 ### *class* AbstractRedisQueue
 
-Bases: `PersistableQueue`, `ABC`
+Bases: [`PersistableQueue`](https://laxertu.github.io/eric/docs.html#eric_sse.persistence.PersistableQueue), `ABC`
 
 #### \_\_init_\_(listener_id, host='127.0.0.1', port=6379, db=0)
 
@@ -36,7 +36,7 @@ Bases: [`AbstractRedisQueue`](#eric_redis_queues.AbstractRedisQueue)
 
 Next message from the queue.
 
-Raises a `NoMessagesException` if the queue is empty.
+Raises a [`NoMessagesException`](https://laxertu.github.io/eric/docs.html#eric_sse.exception.NoMessagesException) if the queue is empty.
 
 * **Return type:**
   *Any* | None
@@ -56,7 +56,7 @@ Behaviour relies on [https://redis.io/docs/latest/commands/blpop/](https://redis
 
 ### *class* AbstractRedisConnectionRepository
 
-Bases: `ConnectionRepositoryInterface`, `ABC`
+Bases: [`ConnectionRepositoryInterface`](https://laxertu.github.io/eric/docs.html#eric_sse.persistence.ConnectionRepositoryInterface), `ABC`
 
 #### \_\_init_\_(host='127.0.0.1', port=6379, db=0)
 
@@ -74,7 +74,7 @@ Returns a concrete Queue instance.
 Returns an Iterable of all persisted connections
 
 * **Return type:**
-  *Iterable*[*Connection*]
+  *Iterable*[[*Connection*](https://laxertu.github.io/eric/docs.html#eric_sse.connection.Connection)]
 
 #### load(channel_id)
 
@@ -83,7 +83,7 @@ Returns an Iterable of all persisted connections of a given channel
 * **Parameters:**
   **channel_id** (*str*)
 * **Return type:**
-  *Iterable*[*Connection*]
+  *Iterable*[[*Connection*](https://laxertu.github.io/eric/docs.html#eric_sse.connection.Connection)]
 
 #### delete(channel_id, listener_id)
 
@@ -121,7 +121,7 @@ Creates a new blocking queue.
 
 ### *class* RedisSSEChannelRepository
 
-Bases: `ChannelRepositoryInterface`
+Bases: [`ChannelRepositoryInterface`](https://laxertu.github.io/eric/docs.html#eric_sse.persistence.ChannelRepositoryInterface)
 
 #### \_\_init_\_(host='127.0.0.1', port=6379, db=0, connection_factory='RedisConnectionsRepository')
 
@@ -136,4 +136,4 @@ Bases: `ChannelRepositoryInterface`
 Returns all channels from the repository.
 
 * **Return type:**
-  *Iterable*[*SSEChannel*]
+  *Iterable*[[*SSEChannel*](https://laxertu.github.io/eric/docs.html#eric_sse.prefabs.SSEChannel)]

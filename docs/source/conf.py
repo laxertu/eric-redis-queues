@@ -19,7 +19,8 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
-    'sphinx_markdown_builder'
+    'sphinx_markdown_builder',
+    'sphinx.ext.intersphinx'
 ]
 
 
@@ -66,3 +67,5 @@ autodoc_typehints = "description"
 
 # Don't show class signature with the class' name.
 autodoc_class_signature = "separated"
+
+intersphinx_mapping = {'eric_sse': ('https://laxertu.github.io/eric/', None)}

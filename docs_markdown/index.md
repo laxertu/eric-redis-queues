@@ -48,6 +48,43 @@ Behaviour relies on [https://redis.io/docs/latest/commands/blpop/](https://redis
 * **Return type:**
   *Any* | None
 
+### *class* AbstractRedisConnectionRepository
+
+#### \_\_init_\_(host='127.0.0.1', port=6379, db=0)
+
+#### *abstract* create_queue(listener_id)
+
+Returns a concrete Queue instance.
+
+* **Parameters:**
+  **listener_id** (*str*) – Corresponding listener id
+* **Return type:**
+  [*AbstractRedisQueue*](#eric_redis_queues.AbstractRedisQueue)
+
+#### load_all()
+
+Returns an Iterable of all persisted connections
+
+* **Return type:**
+  *Iterable*[*Connection*]
+
+#### load(channel_id)
+
+Returns an Iterable of all persisted connections of a given channel
+
+* **Parameters:**
+  **channel_id** (*str*)
+* **Return type:**
+  *Iterable*[*Connection*]
+
+#### delete(channel_id, listener_id)
+
+Deletes a listener given its channel id and listener id.
+
+* **Parameters:**
+  * **channel_id** (*str*)
+  * **listener_id** (*str*)
+
 ### *class* RedisConnectionsRepository
 
 #### create_queue(listener_id)

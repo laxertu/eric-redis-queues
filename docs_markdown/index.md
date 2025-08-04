@@ -6,6 +6,8 @@ A Redis implementation of persistence layer of eric-sse: [https://laxertu.github
 
 ### *class* AbstractRedisQueue
 
+Bases: `PersistableQueue`, `ABC`
+
 #### \_\_init_\_(listener_id, host='127.0.0.1', port=6379, db=0)
 
 * **Parameters:**
@@ -28,6 +30,8 @@ Does de necessary setup of object given its persisted values
 
 ### *class* RedisQueue
 
+Bases: [`AbstractRedisQueue`](#eric_redis_queues.AbstractRedisQueue)
+
 #### pop()
 
 Next message from the queue.
@@ -39,6 +43,8 @@ Raises a `NoMessagesException` if the queue is empty.
 
 ### *class* BlockingRedisQueue
 
+Bases: [`RedisQueue`](#eric_redis_queues.RedisQueue)
+
 Implements a blocking queue. See **pop()** documentation
 
 #### pop()
@@ -49,6 +55,8 @@ Behaviour relies on [https://redis.io/docs/latest/commands/blpop/](https://redis
   *Any* | None
 
 ### *class* AbstractRedisConnectionRepository
+
+Bases: `ConnectionRepositoryInterface`, `ABC`
 
 #### \_\_init_\_(host='127.0.0.1', port=6379, db=0)
 
@@ -87,6 +95,8 @@ Deletes a listener given its channel id and listener id.
 
 ### *class* RedisConnectionsRepository
 
+Bases: [`AbstractRedisConnectionRepository`](#eric_redis_queues.AbstractRedisConnectionRepository)
+
 #### create_queue(listener_id)
 
 Returns a concrete Queue instance.
@@ -98,6 +108,8 @@ Returns a concrete Queue instance.
 
 ### *class* RedisBlockingQueuesRepository
 
+Bases: [`AbstractRedisConnectionRepository`](#eric_redis_queues.AbstractRedisConnectionRepository)
+
 #### create_queue(listener_id)
 
 Creates a new blocking queue.
@@ -108,6 +120,8 @@ Creates a new blocking queue.
   [*BlockingRedisQueue*](#eric_redis_queues.BlockingRedisQueue)
 
 ### *class* RedisSSEChannelRepository
+
+Bases: `ChannelRepositoryInterface`
 
 #### \_\_init_\_(host='127.0.0.1', port=6379, db=0, connection_factory='RedisConnectionsRepository')
 

@@ -6,5 +6,6 @@ Reference
 =========
 
 .. automodule:: eric_redis_queues
+    :show-inheritance:
     :members: AbstractRedisQueue, RedisQueue, BlockingRedisQueue, RedisConnectionsRepository, AbstractRedisConnectionRepository, RedisBlockingQueuesRepository, RedisSSEChannelRepository
     :member-order: bysource

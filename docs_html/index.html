@@ -355,7 +355,8 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisQueue">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractRedisQueue</span></span><a class="headerlink" href="#eric_redis_queues.AbstractRedisQueue" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PersistableQueue</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
 <dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisQueue.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">listener_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6379</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.AbstractRedisQueue.__init__" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">
@@ -393,7 +394,8 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="eric_redis_queues.RedisQueue">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RedisQueue</span></span><a class="headerlink" href="#eric_redis_queues.RedisQueue" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
+<dd><p>Bases: <a class="reference internal" href="#eric_redis_queues.AbstractRedisQueue" title="eric_redis_queues.AbstractRedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractRedisQueue</span></code></a></p>
+<dl class="py method">
 <dt class="sig sig-object py" id="eric_redis_queues.RedisQueue.pop">
 <span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.RedisQueue.pop" title="Link to this definition">#</a></dt>
 <dd><p>Next message from the queue.</p>
@@ -410,7 +412,8 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="eric_redis_queues.BlockingRedisQueue">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BlockingRedisQueue</span></span><a class="headerlink" href="#eric_redis_queues.BlockingRedisQueue" title="Link to this definition">#</a></dt>
-<dd><p>Implements a blocking queue. See <strong>pop()</strong> documentation</p>
+<dd><p>Bases: <a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a></p>
+<p>Implements a blocking queue. See <strong>pop()</strong> documentation</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="eric_redis_queues.BlockingRedisQueue.pop">
 <span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.BlockingRedisQueue.pop" title="Link to this definition">#</a></dt>
@@ -427,7 +430,8 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisConnectionRepository">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractRedisConnectionRepository</span></span><a class="headerlink" href="#eric_redis_queues.AbstractRedisConnectionRepository" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ConnectionRepositoryInterface</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
 <dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisConnectionRepository.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6379</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.AbstractRedisConnectionRepository.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -490,7 +494,8 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="eric_redis_queues.RedisConnectionsRepository">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RedisConnectionsRepository</span></span><a class="headerlink" href="#eric_redis_queues.RedisConnectionsRepository" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
+<dd><p>Bases: <a class="reference internal" href="#eric_redis_queues.AbstractRedisConnectionRepository" title="eric_redis_queues.AbstractRedisConnectionRepository"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractRedisConnectionRepository</span></code></a></p>
+<dl class="py method">
 <dt class="sig sig-object py" id="eric_redis_queues.RedisConnectionsRepository.create_queue">
 <span class="sig-name descname"><span class="pre">create_queue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">listener_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.RedisConnectionsRepository.create_queue" title="Link to this definition">#</a></dt>
 <dd><p>Returns a concrete Queue instance.</p>
@@ -509,7 +514,8 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="eric_redis_queues.RedisBlockingQueuesRepository">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RedisBlockingQueuesRepository</span></span><a class="headerlink" href="#eric_redis_queues.RedisBlockingQueuesRepository" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
+<dd><p>Bases: <a class="reference internal" href="#eric_redis_queues.AbstractRedisConnectionRepository" title="eric_redis_queues.AbstractRedisConnectionRepository"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractRedisConnectionRepository</span></code></a></p>
+<dl class="py method">
 <dt class="sig sig-object py" id="eric_redis_queues.RedisBlockingQueuesRepository.create_queue">
 <span class="sig-name descname"><span class="pre">create_queue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">listener_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.RedisBlockingQueuesRepository.create_queue" title="Link to this definition">#</a></dt>
 <dd><p>Creates a new blocking queue.</p>
@@ -528,7 +534,8 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="eric_redis_queues.RedisSSEChannelRepository">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RedisSSEChannelRepository</span></span><a class="headerlink" href="#eric_redis_queues.RedisSSEChannelRepository" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ChannelRepositoryInterface</span></code></p>
+<dl class="py method">
 <dt class="sig sig-object py" id="eric_redis_queues.RedisSSEChannelRepository.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6379</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection_factory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RedisConnectionsRepository'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.RedisSSEChannelRepository.__init__" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">

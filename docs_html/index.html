@@ -355,20 +355,20 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisQueue">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractRedisQueue</span></span><a class="headerlink" href="#eric_redis_queues.AbstractRedisQueue" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.persistence.PersistableQueue" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PersistableQueue</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dd><p>Bases: <a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.persistence.PersistableQueue" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PersistableQueue</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisQueue.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">listener_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6379</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.AbstractRedisQueue.__init__" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>listener_id</strong> (<em>str</em>)</p>
+<dd class="field-odd"><p><strong>listener_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisQueue.kv_key">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kv_key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#eric_redis_queues.AbstractRedisQueue.kv_key" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kv_key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#eric_redis_queues.AbstractRedisQueue.kv_key" title="Link to this definition">#</a></dt>
 <dd><p>The key to use when persisting object</p>
 </dd></dl>
 
@@ -384,7 +384,7 @@ document.write(`
 <dd><p>Does de necessary setup of object given its persisted values</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>setup</strong> (<em>dict</em>)</p>
+<dd class="field-odd"><p><strong>setup</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -402,7 +402,7 @@ document.write(`
 <p>Raises a <a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.exception.NoMessagesException" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoMessagesException</span></code></a> if the queue is empty.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>Any</em> | None</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><em>Any</em></a> | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -420,7 +420,7 @@ document.write(`
 <dd><p>Behaviour relies on <a class="reference external" href="https://redis.io/docs/latest/commands/blpop/">https://redis.io/docs/latest/commands/blpop/</a> , so calls to it with block program execution until a new message is pushed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>Any</em> | None</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><em>Any</em></a> | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -430,7 +430,7 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisConnectionRepository">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractRedisConnectionRepository</span></span><a class="headerlink" href="#eric_redis_queues.AbstractRedisConnectionRepository" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.persistence.ConnectionRepositoryInterface" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConnectionRepositoryInterface</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dd><p>Bases: <a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.persistence.ConnectionRepositoryInterface" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConnectionRepositoryInterface</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisConnectionRepository.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6379</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.AbstractRedisConnectionRepository.__init__" title="Link to this definition">#</a></dt>
@@ -442,7 +442,7 @@ document.write(`
 <dd><p>Returns a concrete Queue instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>listener_id</strong> (<em>str</em>) – Corresponding listener id</p>
+<dd class="field-odd"><p><strong>listener_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Corresponding listener id</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#eric_redis_queues.AbstractRedisQueue" title="eric_redis_queues.AbstractRedisQueue"><em>AbstractRedisQueue</em></a></p>
@@ -456,7 +456,7 @@ document.write(`
 <dd><p>Returns an Iterable of all persisted connections</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>Iterable</em>[<a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.connection.Connection" title="(in eric-sse)"><em>Connection</em></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.13)"><em>Iterable</em></a>[<a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.connection.Connection" title="(in eric-sse)"><em>Connection</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -467,10 +467,10 @@ document.write(`
 <dd><p>Returns an Iterable of all persisted connections of a given channel</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>channel_id</strong> (<em>str</em>)</p>
+<dd class="field-odd"><p><strong>channel_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>Iterable</em>[<a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.connection.Connection" title="(in eric-sse)"><em>Connection</em></a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.13)"><em>Iterable</em></a>[<a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.connection.Connection" title="(in eric-sse)"><em>Connection</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -482,8 +482,8 @@ document.write(`
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>channel_id</strong> (<em>str</em>)</p></li>
-<li><p><strong>listener_id</strong> (<em>str</em>)</p></li>
+<li><p><strong>channel_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>listener_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -501,7 +501,7 @@ document.write(`
 <dd><p>Returns a concrete Queue instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>listener_id</strong> (<em>str</em>) – Corresponding listener id</p>
+<dd class="field-odd"><p><strong>listener_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Corresponding listener id</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><em>RedisQueue</em></a></p>
@@ -521,7 +521,7 @@ document.write(`
 <dd><p>Creates a new blocking queue.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>listener_id</strong> (<em>str</em>)</p>
+<dd class="field-odd"><p><strong>listener_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#eric_redis_queues.BlockingRedisQueue" title="eric_redis_queues.BlockingRedisQueue"><em>BlockingRedisQueue</em></a></p>
@@ -544,7 +544,7 @@ document.write(`
 <li><p><strong>host</strong></p></li>
 <li><p><strong>port</strong></p></li>
 <li><p><strong>db</strong></p></li>
-<li><p><strong>connection_factory</strong> (<em>str</em>) – Connection factory name to use to connect to Redis. Accepted literals are <strong>‘RedisConnectionsRepository’</strong> and <strong>‘RedisBlockingQueuesRepository’</strong></p></li>
+<li><p><strong>connection_factory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Connection factory name to use to connect to Redis. Accepted literals are <strong>‘RedisConnectionsRepository’</strong> and <strong>‘RedisBlockingQueuesRepository’</strong></p></li>
 </ul>
 </dd>
 </dl>
@@ -556,7 +556,7 @@ document.write(`
 <dd><p>Returns all channels from the repository.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>Iterable</em>[<a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.prefabs.SSEChannel" title="(in eric-sse)"><em>SSEChannel</em></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.13)"><em>Iterable</em></a>[<a class="reference external" href="https://laxertu.github.io/eric/docs.html#eric_sse.prefabs.SSEChannel" title="(in eric-sse)"><em>SSEChannel</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>

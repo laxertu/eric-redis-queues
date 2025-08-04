@@ -68,4 +68,7 @@ autodoc_typehints = "description"
 # Don't show class signature with the class' name.
 autodoc_class_signature = "separated"
 
-intersphinx_mapping = {'eric_sse': ('https://laxertu.github.io/eric/', None)}
+intersphinx_mapping = {
+    'eric_sse': ('https://laxertu.github.io/eric/', None),
+    'python': ('https://docs.python.org/3', None)
+}

@@ -37,15 +37,11 @@ Raises a `NoMessagesException` if the queue is empty.
 
 ### *class* BlockingRedisQueue
 
-Implements a blocking queue.
-
-**pop()** behaviour relies on [https://redis.io/docs/latest/commands/blpop/](https://redis.io/docs/latest/commands/blpop/) , so pop calls with block program execution until a new message is pushed.
+Implements a blocking queue. See **pop()** documentation
 
 #### pop()
 
-Next message from the queue.
-
-Raises a `NoMessagesException` if the queue is empty.
+Behaviour relies on [https://redis.io/docs/latest/commands/blpop/](https://redis.io/docs/latest/commands/blpop/) , so calls to it with block program execution until a new message is pushed.
 
 * **Return type:**
   *Any* | None

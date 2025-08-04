@@ -83,13 +83,10 @@ class RedisQueue(AbstractRedisQueue):
             raise RepositoryError(e)
 
 class BlockingRedisQueue(RedisQueue):
-    """
-    Implements a blocking queue.
-
-    **pop()** behaviour relies on https://redis.io/docs/latest/commands/blpop/ , so pop calls with block program execution until a new message is pushed.
-    """
+    """Implements a blocking queue. See **pop()** documentation"""
 
     def pop(self) -> Any | None:
+        """Behaviour relies on https://redis.io/docs/latest/commands/blpop/ , so calls to it with block program execution until a new message is pushed."""
 
         k, v = self._client.blpop([f'{_PREFIX_QUEUES}:{self.kv_key}'])
         return loads(bytes(v))

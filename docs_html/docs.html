@@ -396,13 +396,11 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="eric_redis_queues.BlockingRedisQueue">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BlockingRedisQueue</span></span><a class="headerlink" href="#eric_redis_queues.BlockingRedisQueue" title="Link to this definition">#</a></dt>
-<dd><p>Implements a blocking queue.</p>
-<p><strong>pop()</strong> behaviour relies on <a class="reference external" href="https://redis.io/docs/latest/commands/blpop/">https://redis.io/docs/latest/commands/blpop/</a> , so pop calls with block program execution until a new message is pushed.</p>
+<dd><p>Implements a blocking queue. See <strong>pop()</strong> documentation</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="eric_redis_queues.BlockingRedisQueue.pop">
 <span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.BlockingRedisQueue.pop" title="Link to this definition">#</a></dt>
-<dd><p>Next message from the queue.</p>
-<p>Raises a <code class="xref py py-class docutils literal notranslate"><span class="pre">NoMessagesException</span></code> if the queue is empty.</p>
+<dd><p>Behaviour relies on <a class="reference external" href="https://redis.io/docs/latest/commands/blpop/">https://redis.io/docs/latest/commands/blpop/</a> , so calls to it with block program execution until a new message is pushed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><em>Any</em> | None</p>

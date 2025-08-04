@@ -152,6 +152,7 @@ class RedisConnectionsRepository(AbstractRedisConnectionRepository):
 class RedisBlockingQueuesRepository(AbstractRedisConnectionRepository):
 
     def create_queue(self, listener_id: str) -> BlockingRedisQueue:
+        """Creates a new blocking queue."""
         return BlockingRedisQueue(listener_id= listener_id, host=self._host, port=self._port, db=self._db)
 
 

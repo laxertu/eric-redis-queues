@@ -65,10 +65,10 @@ Returns a concrete Queue instance.
 
 #### create_queue(listener_id)
 
-Returns a concrete Queue instance.
+Creates a new blocking queue.
 
 * **Parameters:**
-  **listener_id** (*str*) – Corresponding listener id
+  **listener_id** (*str*)
 * **Return type:**
   [*BlockingRedisQueue*](#eric_redis_queues.BlockingRedisQueue)
 

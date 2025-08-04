@@ -61,6 +61,17 @@ Returns a concrete Queue instance.
 * **Return type:**
   [*AbstractRedisQueue*](#eric_redis_queues.AbstractRedisQueue)
 
+### *class* RedisBlockingQueuesRepository
+
+#### create_queue(listener_id)
+
+Returns a concrete Queue instance.
+
+* **Parameters:**
+  **listener_id** (*str*) – Corresponding listener id
+* **Return type:**
+  [*AbstractRedisQueue*](#eric_redis_queues.AbstractRedisQueue)
+
 ### *class* RedisSSEChannelRepository
 
 #### \_\_init_\_(host='127.0.0.1', port=6379, db=0, connection_factory='RedisConnectionsRepository')

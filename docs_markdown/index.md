@@ -15,4 +15,5 @@ Example of usage:
   * [`RedisQueue`](docs.md#eric_redis_queues.RedisQueue)
   * [`BlockingRedisQueue`](docs.md#eric_redis_queues.BlockingRedisQueue)
   * [`RedisConnectionsRepository`](docs.md#eric_redis_queues.RedisConnectionsRepository)
+  * [`RedisBlockingQueuesRepository`](docs.md#eric_redis_queues.RedisBlockingQueuesRepository)
   * [`RedisSSEChannelRepository`](docs.md#eric_redis_queues.RedisSSEChannelRepository)

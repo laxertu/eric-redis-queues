@@ -8,3 +8,4 @@
 /.idea/modules.xml
 /.idea/vcs.xml
 /docs/_build/
+/e2e_tests/sandbox.py

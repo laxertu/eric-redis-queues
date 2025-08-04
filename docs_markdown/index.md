@@ -2,18 +2,87 @@
 
 A Redis implementation of persistence layer of eric-sse: [https://laxertu.github.io/eric/docs.html#persistence](https://laxertu.github.io/eric/docs.html#persistence)
 
-Example of usage:
+# Reference
 
-> from eric_sse.prefabs import SSEChannel
+### *class* AbstractRedisQueue
 
-> from eric_redis_queues import RedisConnectionsRepository
+#### \_\_init_\_(listener_id, host='127.0.0.1', port=6379, db=0)
 
-> c = SSEChannel(connections_repository=RedisConnectionsRepository())
+* **Parameters:**
+  **listener_id** (*str*)
 
-* [Reference](docs.md)
-  * [`AbstractRedisQueue`](docs.md#eric_redis_queues.AbstractRedisQueue)
-  * [`RedisQueue`](docs.md#eric_redis_queues.RedisQueue)
-  * [`BlockingRedisQueue`](docs.md#eric_redis_queues.BlockingRedisQueue)
-  * [`RedisConnectionsRepository`](docs.md#eric_redis_queues.RedisConnectionsRepository)
-  * [`RedisBlockingQueuesRepository`](docs.md#eric_redis_queues.RedisBlockingQueuesRepository)
-  * [`RedisSSEChannelRepository`](docs.md#eric_redis_queues.RedisSSEChannelRepository)
+#### *property* kv_key *: str*
+
+The key to use when persisting object
+
+#### *property* kv_value_as_dict
+
+Returns value that will be persisted as a dictionary.
+
+#### setup_by_dict(setup)
+
+Does de necessary setup of object given its persisted values
+
+* **Parameters:**
+  **setup** (*dict*)
+
+### *class* RedisQueue
+
+#### pop()
+
+Next message from the queue.
+
+Raises a `NoMessagesException` if the queue is empty.
+
+* **Return type:**
+  *Any* | None
+
+### *class* BlockingRedisQueue
+
+Implements a blocking queue. See **pop()** documentation
+
+#### pop()
+
+Behaviour relies on [https://redis.io/docs/latest/commands/blpop/](https://redis.io/docs/latest/commands/blpop/) , so calls to it with block program execution until a new message is pushed.
+
+* **Return type:**
+  *Any* | None
+
+### *class* RedisConnectionsRepository
+
+#### create_queue(listener_id)
+
+Returns a concrete Queue instance.
+
+* **Parameters:**
+  **listener_id** (*str*) – Corresponding listener id
+* **Return type:**
+  [*RedisQueue*](#eric_redis_queues.RedisQueue)
+
+### *class* RedisBlockingQueuesRepository
+
+#### create_queue(listener_id)
+
+Creates a new blocking queue.
+
+* **Parameters:**
+  **listener_id** (*str*)
+* **Return type:**
+  [*BlockingRedisQueue*](#eric_redis_queues.BlockingRedisQueue)
+
+### *class* RedisSSEChannelRepository
+
+#### \_\_init_\_(host='127.0.0.1', port=6379, db=0, connection_factory='RedisConnectionsRepository')
+
+* **Parameters:**
+  * **host**
+  * **port**
+  * **db**
+  * **connection_factory** (*str*) – Connection factory name to use to connect to Redis. Accepted literals are **‘RedisConnectionsRepository’** and **‘RedisBlockingQueuesRepository’**
+
+#### load()
+
+Returns all channels from the repository.
+
+* **Return type:**
+  *Iterable*[*SSEChannel*]

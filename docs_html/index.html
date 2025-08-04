@@ -43,7 +43,6 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Reference" href="docs.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -149,10 +148,7 @@
  </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="docs.html">Reference</a></li>
-</ul>
-
+        
     </div>
 </nav></div>
     </div>
@@ -275,7 +271,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
 </div></div>
       
     </div>
@@ -291,6 +289,46 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Eric Redis queues documentation</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eric_redis_queues">Reference</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.AbstractRedisQueue"><code class="docutils literal notranslate"><span class="pre">AbstractRedisQueue</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.AbstractRedisQueue.__init__"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.AbstractRedisQueue.kv_key"><code class="docutils literal notranslate"><span class="pre">kv_key</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.AbstractRedisQueue.kv_value_as_dict"><code class="docutils literal notranslate"><span class="pre">kv_value_as_dict</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.AbstractRedisQueue.setup_by_dict"><code class="docutils literal notranslate"><span class="pre">setup_by_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisQueue"><code class="docutils literal notranslate"><span class="pre">RedisQueue</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisQueue.pop"><code class="docutils literal notranslate"><span class="pre">pop()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.BlockingRedisQueue"><code class="docutils literal notranslate"><span class="pre">BlockingRedisQueue</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.BlockingRedisQueue.pop"><code class="docutils literal notranslate"><span class="pre">pop()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisConnectionsRepository"><code class="docutils literal notranslate"><span class="pre">RedisConnectionsRepository</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisConnectionsRepository.create_queue"><code class="docutils literal notranslate"><span class="pre">create_queue()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisBlockingQueuesRepository"><code class="docutils literal notranslate"><span class="pre">RedisBlockingQueuesRepository</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisBlockingQueuesRepository.create_queue"><code class="docutils literal notranslate"><span class="pre">create_queue()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisSSEChannelRepository"><code class="docutils literal notranslate"><span class="pre">RedisSSEChannelRepository</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisSSEChannelRepository.__init__"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisSSEChannelRepository.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            </nav>
         </div>
     </div>
 </div>
@@ -303,25 +341,150 @@ document.write(`
   <section id="eric-redis-queues-documentation">
 <h1>Eric Redis queues documentation<a class="headerlink" href="#eric-redis-queues-documentation" title="Link to this heading">#</a></h1>
 <p>A Redis implementation of persistence layer of eric-sse: <a class="reference external" href="https://laxertu.github.io/eric/docs.html#persistence">https://laxertu.github.io/eric/docs.html#persistence</a></p>
-<p>Example of usage:</p>
-<blockquote>
-<div><p>from eric_sse.prefabs import SSEChannel</p>
-<p>from eric_redis_queues import RedisConnectionsRepository</p>
-<p>c = SSEChannel(connections_repository=RedisConnectionsRepository())</p>
-</div></blockquote>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="docs.html">Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="docs.html#eric_redis_queues.AbstractRedisQueue"><code class="docutils literal notranslate"><span class="pre">AbstractRedisQueue</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="docs.html#eric_redis_queues.RedisQueue"><code class="docutils literal notranslate"><span class="pre">RedisQueue</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="docs.html#eric_redis_queues.BlockingRedisQueue"><code class="docutils literal notranslate"><span class="pre">BlockingRedisQueue</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="docs.html#eric_redis_queues.RedisConnectionsRepository"><code class="docutils literal notranslate"><span class="pre">RedisConnectionsRepository</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="docs.html#eric_redis_queues.RedisBlockingQueuesRepository"><code class="docutils literal notranslate"><span class="pre">RedisBlockingQueuesRepository</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="docs.html#eric_redis_queues.RedisSSEChannelRepository"><code class="docutils literal notranslate"><span class="pre">RedisSSEChannelRepository</span></code></a></li>
+</section>
+<section id="module-eric_redis_queues">
+<span id="reference"></span><h1>Reference<a class="headerlink" href="#module-eric_redis_queues" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisQueue">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractRedisQueue</span></span><a class="headerlink" href="#eric_redis_queues.AbstractRedisQueue" title="Link to this definition">#</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisQueue.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">listener_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6379</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.AbstractRedisQueue.__init__" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>listener_id</strong> (<em>str</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisQueue.kv_key">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kv_key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#eric_redis_queues.AbstractRedisQueue.kv_key" title="Link to this definition">#</a></dt>
+<dd><p>The key to use when persisting object</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisQueue.kv_value_as_dict">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kv_value_as_dict</span></span><a class="headerlink" href="#eric_redis_queues.AbstractRedisQueue.kv_value_as_dict" title="Link to this definition">#</a></dt>
+<dd><p>Returns value that will be persisted as a dictionary.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eric_redis_queues.AbstractRedisQueue.setup_by_dict">
+<span class="sig-name descname"><span class="pre">setup_by_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">setup</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.AbstractRedisQueue.setup_by_dict" title="Link to this definition">#</a></dt>
+<dd><p>Does de necessary setup of object given its persisted values</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>setup</strong> (<em>dict</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="eric_redis_queues.RedisQueue">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RedisQueue</span></span><a class="headerlink" href="#eric_redis_queues.RedisQueue" title="Link to this definition">#</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="eric_redis_queues.RedisQueue.pop">
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.RedisQueue.pop" title="Link to this definition">#</a></dt>
+<dd><p>Next message from the queue.</p>
+<p>Raises a <code class="xref py py-class docutils literal notranslate"><span class="pre">NoMessagesException</span></code> if the queue is empty.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Any</em> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="eric_redis_queues.BlockingRedisQueue">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BlockingRedisQueue</span></span><a class="headerlink" href="#eric_redis_queues.BlockingRedisQueue" title="Link to this definition">#</a></dt>
+<dd><p>Implements a blocking queue. See <strong>pop()</strong> documentation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="eric_redis_queues.BlockingRedisQueue.pop">
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.BlockingRedisQueue.pop" title="Link to this definition">#</a></dt>
+<dd><p>Behaviour relies on <a class="reference external" href="https://redis.io/docs/latest/commands/blpop/">https://redis.io/docs/latest/commands/blpop/</a> , so calls to it with block program execution until a new message is pushed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Any</em> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="eric_redis_queues.RedisConnectionsRepository">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RedisConnectionsRepository</span></span><a class="headerlink" href="#eric_redis_queues.RedisConnectionsRepository" title="Link to this definition">#</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="eric_redis_queues.RedisConnectionsRepository.create_queue">
+<span class="sig-name descname"><span class="pre">create_queue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">listener_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.RedisConnectionsRepository.create_queue" title="Link to this definition">#</a></dt>
+<dd><p>Returns a concrete Queue instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>listener_id</strong> (<em>str</em>) – Corresponding listener id</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><em>RedisQueue</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="eric_redis_queues.RedisBlockingQueuesRepository">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RedisBlockingQueuesRepository</span></span><a class="headerlink" href="#eric_redis_queues.RedisBlockingQueuesRepository" title="Link to this definition">#</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="eric_redis_queues.RedisBlockingQueuesRepository.create_queue">
+<span class="sig-name descname"><span class="pre">create_queue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">listener_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.RedisBlockingQueuesRepository.create_queue" title="Link to this definition">#</a></dt>
+<dd><p>Creates a new blocking queue.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>listener_id</strong> (<em>str</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#eric_redis_queues.BlockingRedisQueue" title="eric_redis_queues.BlockingRedisQueue"><em>BlockingRedisQueue</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="eric_redis_queues.RedisSSEChannelRepository">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RedisSSEChannelRepository</span></span><a class="headerlink" href="#eric_redis_queues.RedisSSEChannelRepository" title="Link to this definition">#</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="eric_redis_queues.RedisSSEChannelRepository.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6379</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection_factory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RedisConnectionsRepository'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.RedisSSEChannelRepository.__init__" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>host</strong></p></li>
+<li><p><strong>port</strong></p></li>
+<li><p><strong>db</strong></p></li>
+<li><p><strong>connection_factory</strong> (<em>str</em>) – Connection factory name to use to connect to Redis. Accepted literals are <strong>‘RedisConnectionsRepository’</strong> and <strong>‘RedisBlockingQueuesRepository’</strong></p></li>
 </ul>
-</li>
-</ul>
-</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eric_redis_queues.RedisSSEChannelRepository.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.RedisSSEChannelRepository.load" title="Link to this definition">#</a></dt>
+<dd><p>Returns all channels from the repository.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Iterable</em>[<em>SSEChannel</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -335,21 +498,59 @@ document.write(`
                 <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
-    <a class="right-next"
-       href="docs.html"
-       title="next page">
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Reference</p>
-      </div>
-      <i class="fa-solid fa-angle-right"></i>
-    </a>
 </div>
                 </footer>
               
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Eric Redis queues documentation</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eric_redis_queues">Reference</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.AbstractRedisQueue"><code class="docutils literal notranslate"><span class="pre">AbstractRedisQueue</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.AbstractRedisQueue.__init__"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.AbstractRedisQueue.kv_key"><code class="docutils literal notranslate"><span class="pre">kv_key</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.AbstractRedisQueue.kv_value_as_dict"><code class="docutils literal notranslate"><span class="pre">kv_value_as_dict</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.AbstractRedisQueue.setup_by_dict"><code class="docutils literal notranslate"><span class="pre">setup_by_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisQueue"><code class="docutils literal notranslate"><span class="pre">RedisQueue</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisQueue.pop"><code class="docutils literal notranslate"><span class="pre">pop()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.BlockingRedisQueue"><code class="docutils literal notranslate"><span class="pre">BlockingRedisQueue</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.BlockingRedisQueue.pop"><code class="docutils literal notranslate"><span class="pre">pop()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisConnectionsRepository"><code class="docutils literal notranslate"><span class="pre">RedisConnectionsRepository</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisConnectionsRepository.create_queue"><code class="docutils literal notranslate"><span class="pre">create_queue()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisBlockingQueuesRepository"><code class="docutils literal notranslate"><span class="pre">RedisBlockingQueuesRepository</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisBlockingQueuesRepository.create_queue"><code class="docutils literal notranslate"><span class="pre">create_queue()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisSSEChannelRepository"><code class="docutils literal notranslate"><span class="pre">RedisSSEChannelRepository</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisSSEChannelRepository.__init__"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisSSEChannelRepository.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </nav></div>
+
+</div></div>
               
             
           </div>

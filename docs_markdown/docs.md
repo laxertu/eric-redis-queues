@@ -55,7 +55,7 @@ Returns a concrete Queue instance.
 * **Parameters:**
   **listener_id** (*str*) – Corresponding listener id
 * **Return type:**
-  [*RedisQueue*](#eric_redis_queues.RedisQueue)
+  [*RedisQueue*](index.md#eric_redis_queues.RedisQueue)
 
 ### *class* RedisBlockingQueuesRepository
 
@@ -66,7 +66,7 @@ Creates a new blocking queue.
 * **Parameters:**
   **listener_id** (*str*)
 * **Return type:**
-  [*BlockingRedisQueue*](#eric_redis_queues.BlockingRedisQueue)
+  [*BlockingRedisQueue*](index.md#eric_redis_queues.BlockingRedisQueue)
 
 ### *class* RedisSSEChannelRepository
 

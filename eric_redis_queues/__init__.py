@@ -146,12 +146,12 @@ class AbstractRedisConnectionRepository(ConnectionRepositoryInterface, ABC):
 
 class RedisConnectionsRepository(AbstractRedisConnectionRepository):
 
-    def create_queue(self, listener_id: str) -> AbstractRedisQueue:
+    def create_queue(self, listener_id: str) -> RedisQueue:
         return RedisQueue(listener_id= listener_id, host=self._host, port=self._port, db=self._db)
 
 class RedisBlockingQueuesRepository(AbstractRedisConnectionRepository):
 
-    def create_queue(self, listener_id: str) -> AbstractRedisQueue:
+    def create_queue(self, listener_id: str) -> BlockingRedisQueue:
         return BlockingRedisQueue(listener_id= listener_id, host=self._host, port=self._port, db=self._db)
 
 

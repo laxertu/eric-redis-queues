@@ -2,7 +2,7 @@
 name = "eric-redis-queues"
 description = "Redis support for eric-sse"
 requires-python = ">=3.10, <3.12"
-version = "1.0.11.1"
+version = "1.0.11.2"
 authors = [
     {name = "Luca Stretti", email = "laxertu@gmail.com"}
 ]
@@ -13,7 +13,7 @@ readme = "README.md"
 dependencies = [
     "asyncio (>=3.4.3, <3.4.4)",
     "redis == 6.2.0",
-    "eric-sse == 1.5.3"
+    "eric-sse == 1.5.5"
 ]
 
 [project.urls]

@@ -11,7 +11,7 @@ from eric_sse.message import MessageContract
 from eric_sse.prefabs import SSEChannel
 from eric_sse.persistence import (
     ConnectionRepositoryInterface, PersistableQueue,
-    ChannelRepositoryInterface
+    ChannelRepositoryInterface, PersistableChannel
 )
 from eric_sse.connection import Connection
 
@@ -196,23 +196,31 @@ class RedisSSEChannelRepository(ChannelRepositoryInterface):
             raise RepositoryError(f"Unknown repository class {class_name}") from e
         return constructor(host=self.__host, port=self.__port, db=self.__db)
 
+    def _fetch_channel_by_key(self, key: str) -> SSEChannel:
+        try:
+            channel_construction_params: dict[str] = json.loads(self.__client.get(key))
+            connections_repository = self.__create_repository(channel_construction_params['connections_repository'])
+            channel_construction_params['connections_repository'] = connections_repository
+            channel = SSEChannel(**channel_construction_params)
+
+            for connection in connections_repository.load(channel.kv_key):
+                channel.register_connection(listener=connection.listener, queue=connection.queue)
+
+            return channel
+
+        except Exception as e:
+            raise RepositoryError(e)
+
+    def get_channel(self, channel_id: str) -> PersistableChannel:
+        key = f'{_PREFIX_CHANNELS}:{channel_id}:'
+        return self._fetch_channel_by_key(key)
+
     def load(self) -> Iterable[SSEChannel]:
         """Returns all channels from the repository."""
         try:
             for redis_key in self.__client.scan_iter(f"{_PREFIX_CHANNELS}:*"):
                 key = redis_key.decode()
-                try:
-                    channel_construction_params: dict[str] = json.loads(self.__client.get(key))
-                    connections_repository = self.__create_repository(channel_construction_params['connections_repository'])
-                    channel_construction_params['connections_repository'] = connections_repository
-                    channel = SSEChannel(**channel_construction_params)
-
-                    for connection in connections_repository.load(channel.kv_key):
-                        channel.register_connection(listener=connection.listener, queue=connection.queue)
-
-                    yield channel
-                except Exception as e:
-                    logger.error(repr(e))
+                yield self._fetch_channel_by_key(key)
 
         except Exception as e:
             raise RepositoryError(e)

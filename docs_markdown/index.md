@@ -1,6 +1,9 @@
 # Eric Redis queues documentation
 
-A Redis implementation of persistence layer of eric-sse: [https://laxertu.github.io/eric/docs.html#persistence](https://laxertu.github.io/eric/docs.html#persistence)
+A Redis implementation of persistence layer of eric-sse:
+
+* [Persistence layer documentation](https://laxertu.github.io/eric/docs.html#persistence)
+* An example of [microservice](https://pypi.org/project/eric-api/) based on this project
 
 # Reference
 
@@ -23,10 +26,14 @@ Returns value that will be persisted as a dictionary.
 
 #### setup_by_dict(setup)
 
-Does de necessary setup of object given its persisted values
+Does de necessary post-creation setup of object given its persisted values
 
 * **Parameters:**
   **setup** ([*dict*](https://docs.python.org/3/library/stdtypes.html#dict))
+
+#### *property* kv_constructor_params_as_dict *: [dict](https://docs.python.org/3/library/stdtypes.html#dict)*
+
+Class constructor parameters as dict
 
 ### *class* RedisQueue
 
@@ -123,7 +130,7 @@ Creates a new blocking queue.
 
 Bases: [`ChannelRepositoryInterface`](https://laxertu.github.io/eric/docs.html#eric_sse.persistence.ChannelRepositoryInterface)
 
-#### \_\_init_\_(host='127.0.0.1', port=6379, db=0, connection_factory='RedisConnectionsRepository')
+#### \_\_init_\_(host='127.0.0.1', port=6379, db=0, connection_factory='eric_redis_queues.RedisConnectionsRepository')
 
 * **Parameters:**
   * **host**

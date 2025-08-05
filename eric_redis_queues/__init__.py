@@ -211,7 +211,7 @@ class RedisSSEChannelRepository(ChannelRepositoryInterface):
         except Exception as e:
             raise RepositoryError(e)
 
-    def get_channel(self, channel_id: str) -> PersistableChannel:
+    def get_channel(self, channel_id: str) -> SSEChannel:
         key = f'{_PREFIX_CHANNELS}:{channel_id}:'
         return self._fetch_channel_by_key(key)
 

@@ -237,14 +237,14 @@ files = [
 
 [[package]]
 name = "eric-sse"
-version = "1.5.5"
+version = "2.0.0.0a1"
 description = "A lightweight message dispatcher based on SSE protocol data transfer objects format"
 optional = false
 python-versions = "<3.12,>=3.10"
 groups = ["main"]
 files = [
-    {file = "eric_sse-1.5.5-py3-none-any.whl", hash = "sha256:f2781c6613d013503c6376c4a52d9cd68a2285f4c072f6cd33e56e69193c790e"},
-    {file = "eric_sse-1.5.5.tar.gz", hash = "sha256:69b0bddd317c3f3ba6c772fe635a142646b7abc4728111a2bdc107b1e50eee36"},
+    {file = "eric_sse-2.0.0.0a1-py3-none-any.whl", hash = "sha256:db4685e5f6020c29afb19331f4b683357d3d9559a37877e5c250599d85c04518"},
+    {file = "eric_sse-2.0.0.0a1.tar.gz", hash = "sha256:cfb378d13489cf340d2e91b0662bb761827ceb3793d5ca23362098a8e9cb3789"},
 ]
 
 [package.dependencies]
@@ -756,4 +756,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10, <3.12"
-content-hash = "07cc5acce1d5b56c386b4defec107dd88fcca7a8774de5cfd17c89b3195353c7"
+content-hash = "8bf95b386b1acf3436881bc55333060cdf372a31640676edda442a0e09f79009"

@@ -10,7 +10,7 @@ repo_2 = RedisBlockingQueuesRepository()
 
 
 def do_test(r: AbstractRedisConnectionRepository):
-    ch = SSEChannel(connections_repository=r)
+    ch = SSEChannel()
 
     sm = SignedMessage(sender_id='admin', msg_type='test', msg_payload='hi there')
     um = UniqueMessage(message_id='mgs_id0001', sender_id='administrator',

@@ -6,9 +6,8 @@ try:
     channel_id = sys.argv[1]
     l_id = sys.argv[2]
     repo = RedisSSEChannelRepository()
-    channels = {ch.id: ch for ch in repo.load()}
-    ch = channels[channel_id]
-    ch.load_persisted_data()
+
+    ch = repo.load_one(channel_id=channel_id)
     ch.get_listener(listener_id=l_id).start()
 
     while True:

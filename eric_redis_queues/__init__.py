@@ -9,10 +9,11 @@ from eric_sse import get_logger
 from eric_sse.exception import NoMessagesException, RepositoryError
 from eric_sse.message import MessageContract
 from eric_sse.prefabs import SSEChannel
-from eric_sse.persistence import (
-    ConnectionRepositoryInterface, PersistableQueue,
-    ChannelRepositoryInterface, PersistableChannel
-)
+from eric_sse.interfaces import ConnectionRepositoryInterface, ChannelRepositoryInterface
+from eric_sse.persistence import KvStorageEngine, ItemNotFound
+
+from eric_sse.queues import PersistableQueue
+
 from eric_sse.connection import Connection
 
 logger = get_logger()
@@ -24,6 +25,31 @@ _PREFIX_CHANNELS = f'eric-redis-queues:c'
 
 CONNECTION_REPOSITORY_DEFAULT = 'eric_redis_queues.RedisConnectionsRepository'
 CONNECTION_REPOSITORY_BLOCKING = 'eric_redis_queues.RedisBlockingQueuesRepository'
+
+class RedisStorage(KvStorageEngine):
+
+    def __init__(self, kv_prefix: str, host='127.0.0.1', port=6379, db=0):
+        self.__kv_prefix = kv_prefix
+        self._client = Redis(host=host, port=port, db=db)
+
+    def __fetch_by_prefix(self, prefix: str) -> Iterable[any]:
+        for redis_key in self._client.scan_iter(prefix):
+            yield loads(self._client.get(redis_key))
+
+    def fetch_all(self) -> Iterable[any]:
+        return self.__fetch_by_prefix(f"{self.__kv_prefix}:*")
+
+    def fetch_by_prefix(self, prefix: str) -> Iterable[any]:
+        return self.__fetch_by_prefix(f"{self.__kv_prefix}:{prefix}")
+
+    def upsert(self, key: str, value: any):
+        self._client.set(key, value)
+
+    def fetch_one(self, key: str) -> any:
+        return self._client.get(key)
+
+    def delete(self, key: str):
+        self._client.delete(key)
 
 
 class AbstractRedisQueue(PersistableQueue, ABC):
@@ -37,7 +63,7 @@ class AbstractRedisQueue(PersistableQueue, ABC):
         self.__db: int | None = None
         self.__value_as_dict = {}
 
-        self.setup_by_dict({
+        self.kv_setup_by_dict({
             'listener_id': listener_id,
             'host': host,
             'port': port,
@@ -49,10 +75,10 @@ class AbstractRedisQueue(PersistableQueue, ABC):
         return self.__id
 
     @property
-    def kv_value_as_dict(self):
+    def kv_setup_values_as_dict(self):
         return self.__value_as_dict
 
-    def setup_by_dict(self, setup: dict):
+    def kv_setup_by_dict(self, setup: dict):
         self.__id = setup['listener_id']
         self.__host = setup['host']
         self.__port = setup['port']
@@ -108,21 +134,18 @@ class AbstractRedisConnectionRepository(ConnectionRepositoryInterface, ABC):
         self._db: int = db
         self._client = Redis(host=host, port=port, db=db)
 
+    def load_one(self, channel_id: str, connection_id: str) -> Connection:
+        key = f"{_PREFIX_LISTENERS}:{channel_id}:{connection_id}"
+        listener = loads(self._client.get(key))
+        queue = self.create_queue(listener_id=listener.id)
+        return Connection(listener=listener, queue=queue)
+
     @abc.abstractmethod
     def create_queue(self, listener_id: str) -> AbstractRedisQueue:
         ...
 
-    def load_all(self) -> Iterable[Connection]:
-        for redis_key in self._client.scan_iter(f"{_PREFIX_LISTENERS}:*"):
-            key = redis_key.decode()
-            try:
-                listener = loads(self._client.get(key))
-                queue = self.create_queue(listener_id=listener.id)
-                yield Connection(listener=listener, queue=queue)
-            except Exception as e:
-                raise RepositoryError(e)
 
-    def load(self, channel_id: str) -> Iterable[Connection]:
+    def load_all(self, channel_id: str) -> Iterable[Connection]:
         for redis_key in self._client.scan_iter(f"{_PREFIX_LISTENERS}:{channel_id}:*"):
             key = redis_key.decode()
             try:
@@ -137,6 +160,7 @@ class AbstractRedisConnectionRepository(ConnectionRepositoryInterface, ABC):
             self._client.set(f'{_PREFIX_LISTENERS}:{channel_id}:{connection.listener.id}', dumps(connection.listener))
         except Exception as e:
             raise RepositoryError(e)
+
 
     def delete(self, channel_id: str, listener_id: str):
         """Deletes a listener given its channel id and listener id."""
@@ -153,10 +177,12 @@ class AbstractRedisConnectionRepository(ConnectionRepositoryInterface, ABC):
 
 class RedisConnectionsRepository(AbstractRedisConnectionRepository):
 
+
     def create_queue(self, listener_id: str) -> RedisQueue:
         return RedisQueue(listener_id= listener_id, host=self._host, port=self._port, db=self._db)
 
 class RedisBlockingQueuesRepository(AbstractRedisConnectionRepository):
+
 
     def create_queue(self, listener_id: str) -> BlockingRedisQueue:
         """Creates a new blocking queue."""
@@ -198,24 +224,25 @@ class RedisSSEChannelRepository(ChannelRepositoryInterface):
 
     def _fetch_channel_by_key(self, key: str) -> SSEChannel:
         try:
-            channel_construction_params: dict[str] = json.loads(self.__client.get(key))
-            connections_repository = self.__create_repository(channel_construction_params['connections_repository'])
-            channel_construction_params['connections_repository'] = connections_repository
+            channel_construction_params: dict[str] = json.loads(self.__client.get(key).decode())
+            if channel_construction_params is None:
+                raise ItemNotFound(f"Channel {key} doesn't exist")
+
             channel = SSEChannel(**channel_construction_params)
 
-            for connection in connections_repository.load(channel.kv_key):
+            for connection in self.__connection_factory.load_all(channel.kv_key):
                 channel.register_connection(listener=connection.listener, queue=connection.queue)
 
             return channel
 
         except Exception as e:
-            raise RepositoryError(e)
+            raise RepositoryError from e
 
-    def get_channel(self, channel_id: str) -> SSEChannel:
-        key = f'{_PREFIX_CHANNELS}:{channel_id}:'
+    def load_one(self, channel_id: str) -> SSEChannel:
+        key = f'{_PREFIX_CHANNELS}:{channel_id}'
         return self._fetch_channel_by_key(key)
 
-    def load(self) -> Iterable[SSEChannel]:
+    def load_all(self) -> Iterable[SSEChannel]:
         """Returns all channels from the repository."""
         try:
             for redis_key in self.__client.scan_iter(f"{_PREFIX_CHANNELS}:*"):
@@ -227,7 +254,7 @@ class RedisSSEChannelRepository(ChannelRepositoryInterface):
 
     def persist(self, persistable: SSEChannel):
         try:
-            data_to_persist = persistable.kv_value_as_dict
+            data_to_persist = persistable.kv_setup_values_as_dict
             self.__client.set(f'{_PREFIX_CHANNELS}:{persistable.id}', json.dumps(data_to_persist))
         except Exception as e:
             raise RepositoryError(e)
@@ -235,12 +262,13 @@ class RedisSSEChannelRepository(ChannelRepositoryInterface):
     def delete(self, key: str):
         try:
             for listener_key in self.__client.scan_iter(f"{_PREFIX_LISTENERS}:{key}:*"):
-                self.__connection_factory.delete(channel_id=key, listener_id=listener_key.decode().split(':')[3])
+                self.__connection_factory.delete(channel_id=key, connection_id=listener_key.decode().split(':')[3])
 
             self.__client.delete(f'{_PREFIX_CHANNELS}:{key}')
         except Exception as e:
             raise RepositoryError(e)
 
+    # TODO think about this
     def delete_listener(self, channel_id: str, listener_id: str) -> None:
         try:
             self.__client.delete(f'{_PREFIX_LISTENERS}:{channel_id}:{listener_id}')

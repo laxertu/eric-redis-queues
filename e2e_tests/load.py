@@ -1,11 +1,11 @@
 from eric_redis_queues import (
-    AbstractRedisConnectionRepository, RedisConnectionsRepository, RedisBlockingQueuesRepository,
+    AbstractRedisConnectionRepository, RedisNonBlockingQueuesRepository, RedisBlockingQueuesRepository,
     RedisSSEChannelRepository
 )
 from eric_sse.message import SignedMessage, UniqueMessage, Message
 from eric_sse.prefabs import SSEChannel
 
-repo_1 = RedisConnectionsRepository()
+repo_1 = RedisNonBlockingQueuesRepository()
 repo_2 = RedisBlockingQueuesRepository()
 
 
@@ -24,7 +24,7 @@ def do_test(r: AbstractRedisConnectionRepository):
     ch.broadcast(um)
     ch.broadcast(m)
 
-    repo_persist = RedisSSEChannelRepository()
+    repo_persist = RedisSSEChannelRepository(connection_repository=r)
     repo_persist.persist(ch)
 
 print("Default")

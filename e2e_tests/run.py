@@ -1,11 +1,11 @@
 import sys
-from eric_redis_queues import RedisSSEChannelRepository
+from eric_redis_queues import RedisSSEChannelRepository, RedisNonBlockingQueuesRepository
 from eric_sse.exception import NoMessagesException, InvalidListenerException
 
 try:
     channel_id = sys.argv[1]
     l_id = sys.argv[2]
-    repo = RedisSSEChannelRepository()
+    repo = RedisSSEChannelRepository(RedisNonBlockingQueuesRepository())
 
     ch = repo.load_one(channel_id=channel_id)
     ch.get_listener(listener_id=l_id).start()

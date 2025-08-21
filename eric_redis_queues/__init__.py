@@ -11,9 +11,7 @@ from eric_sse.exception import NoMessagesException, RepositoryError
 from eric_sse.entities import MessageContract
 
 PREFIX = 'eric-redis-queues'
-PREFIX_QUEUES = f'eric-redis-queues:q'
-PREFIX_LISTENERS = f'eric-redis-queues:l'
-PREFIX_CHANNELS = f'eric-redis-queues:c'
+PREFIX_QUEUES = f'{PREFIX}:q'
 
 
 @dataclass

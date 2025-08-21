@@ -9,8 +9,10 @@ from eric_sse.queues import Queue
 from eric_sse.exception import RepositoryError
 from eric_sse.prefabs import SSEChannel
 
-from eric_redis_queues import RedisConnection, PREFIX, PREFIX_CHANNELS, PREFIX_QUEUES, PREFIX_LISTENERS
+from eric_redis_queues import RedisConnection, PREFIX
 
+PREFIX_LISTENERS = f'{PREFIX}:l'
+PREFIX_CHANNELS = f'{PREFIX}:c'
 
 class RedisSSEChannelRepository(ChannelRepositoryInterface, ABC):
 

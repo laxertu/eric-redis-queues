@@ -7,7 +7,7 @@ from eric_sse.listener import MessageQueueListener
 from eric_sse.queues import Queue
 from redis import Redis
 
-from eric_redis_queues import RedisQueue, BlockingRedisQueue
+from eric_redis_queues import RedisQueue, BlockingRedisQueue, AbstractRedisQueue
 from eric_sse.repository import AbstractChannelRepository, AbstractConnectionRepository
 
 class RedisStorageEngine:
@@ -56,8 +56,8 @@ class AbstractRedisQueueRepository(QueueRepositoryInterface, ABC):
     def __init__(self,storage_engine: RedisStorageEngine):
         self._storage_engine: RedisStorageEngine = storage_engine
 
-    def persist(self, connection_id: str, queue: Queue):
-        self._storage_engine.upsert(connection_id, queue)
+    def persist(self, connection_id: str, queue: AbstractRedisQueue):
+        self._storage_engine.upsert(connection_id, queue.to_dict())
 
     def delete(self, connection_id: str):
         self._storage_engine.delete(connection_id)

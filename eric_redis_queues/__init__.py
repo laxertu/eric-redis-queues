@@ -28,15 +28,20 @@ class RedisConnection:
 
 class AbstractRedisQueue(Queue, ABC):
 
-    def __init__(self, queue_id: str = None, host='127.0.0.1', port=6379, db=0):
+    def __init__(self, redis_connection: RedisConnection, queue_id: str = None):
         super().__init__()
         self.queue_id = queue_id if queue_id else generate_uuid()
-        self.__redis_connection: RedisConnection = RedisConnection(
-            host=host,
-            port=port,
-            db=db
-        )
-        self._client = Redis(host=host, port=port, db=db)
+        self.redis_connection = redis_connection
+        self._client = Redis(host=redis_connection.host, port=redis_connection.port, db=redis_connection.db)
+
+
+    def to_dict(self) -> dict:
+        return {
+            'queue_id': self.queue_id,
+            'redis_connection': self.redis_connection
+        }
+
+
 
 
 class RedisQueue(AbstractRedisQueue):

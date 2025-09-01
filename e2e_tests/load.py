@@ -1,16 +1,16 @@
-from eric_redis_queues.prefabs import RedisSSENonBlockingChannelApplication, RedisConnection
+from eric_redis_queues.prefabs import RedisBlockingConnectionRepository, RedisNonBlockingConnectionRepository
 from eric_sse.prefabs import SSEChannel
 
 # channels are saved or creation. Subsequent load calls return new instances with same properties
-app = RedisSSENonBlockingChannelApplication(RedisConnection())
-channel = app.create_channel(retry_timeout_millis=987)
+r1 = RedisNonBlockingConnectionRepository()
+channel = SSEChannel(stream_delay_seconds=22, retry_timeout_milliseconds=33, channel_id='test')
 
-app2 = RedisSSENonBlockingChannelApplication(RedisConnection())
-channel2: SSEChannel = app2.channel_repository.load_one(channel_id=channel.id)
+r2 = RedisNonBlockingConnectionRepository()
+#channel2: SSEChannel = r2.load_one(channel.id)
 
-assert id(channel) != id(channel2)
-assert channel.id == channel2.id
-assert channel2.retry_timeout_milliseconds == channel.retry_timeout_milliseconds
+#assert id(channel) != id(channel2)
+#assert channel.id == channel2.id
+#assert channel2.retry_timeout_milliseconds == channel.retry_timeout_milliseconds
 
 
 

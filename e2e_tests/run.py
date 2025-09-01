@@ -1,14 +1,13 @@
 import sys
-from eric_redis_queues import RedisSSEChannelRepository
+from eric_redis_queues.prefabs import RedisSSEChannelsRepository, RedisStorageEngine
 from eric_sse.exception import NoMessagesException, InvalidListenerException
 
 try:
     channel_id = sys.argv[1]
     l_id = sys.argv[2]
-    repo = RedisSSEChannelRepository()
-    channels = {ch.id: ch for ch in repo.load()}
+    repo = RedisSSEChannelsRepository(RedisStorageEngine(prefix='c'))
+    channels = {ch.id: ch for ch in repo.load_all()}
     ch = channels[channel_id]
-    ch.load_persisted_data()
     ch.get_listener(listener_id=l_id).start()
 
     while True:

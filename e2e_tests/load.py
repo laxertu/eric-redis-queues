@@ -1,16 +1,23 @@
-from eric_redis_queues import (
-    AbstractRedisConnectionRepository, RedisConnectionsRepository, RedisBlockingQueuesRepository,
-    RedisSSEChannelRepository
-)
-from eric_sse.message import SignedMessage, UniqueMessage, Message
+from eric_redis_queues.prefabs import RedisSSENonBlockingChannelApplication, RedisConnection
 from eric_sse.prefabs import SSEChannel
 
-repo_1 = RedisConnectionsRepository()
-repo_2 = RedisBlockingQueuesRepository()
+# channels are saved or creation. Subsequent load calls return new instances with same properties
+app = RedisSSENonBlockingChannelApplication(RedisConnection())
+channel = app.create_channel(retry_timeout_millis=987)
+
+app2 = RedisSSENonBlockingChannelApplication(RedisConnection())
+channel2: SSEChannel = app2.channel_repository.load_one(channel_id=channel.id)
+
+assert id(channel) != id(channel2)
+assert channel.id == channel2.id
+assert channel2.retry_timeout_milliseconds == channel.retry_timeout_milliseconds
 
 
+
+
+"""
 def do_test(r: AbstractRedisConnectionRepository):
-    ch = SSEChannel(connections_repository=r)
+    ch = SSEChannel()
 
     sm = SignedMessage(sender_id='admin', msg_type='test', msg_payload='hi there')
     um = UniqueMessage(message_id='mgs_id0001', sender_id='administrator',
@@ -24,11 +31,12 @@ def do_test(r: AbstractRedisConnectionRepository):
     ch.broadcast(um)
     ch.broadcast(m)
 
-    repo_persist = RedisSSEChannelRepository()
+    repo_persist = ChannelRepository(RedisStorageEngine('e2e-tests-channels'))
     repo_persist.persist(ch)
 
 print("Default")
 do_test(repo_1)
 print("Blocking")
 do_test(repo_2)
+"""
 

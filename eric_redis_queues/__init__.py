@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Any
 from pickle import dumps, loads
 from dataclasses import dataclass
@@ -15,7 +15,8 @@ logger = get_logger()
 PREFIX = 'eric-redis-queues'
 PREFIX_QUEUES = f'{PREFIX}:q'
 PREFIX_LISTENERS = f'{PREFIX}:l'
-PREFIX_CHANNELS = f'{PREFIX}:c'
+PREFIX_CONNECTIONS = f'{PREFIX}:c'
+PREFIX_CHANNELS = f'{PREFIX}:chn'
 
 CONNECTION_REPOSITORY_DEFAULT = 'eric_redis_queues.RedisConnectionsRepository'
 CONNECTION_REPOSITORY_BLOCKING = 'eric_redis_queues.RedisBlockingQueuesRepository'
@@ -34,13 +35,11 @@ class AbstractRedisQueue(Queue, ABC):
         self.redis_connection = redis_connection
         self._client = Redis(host=redis_connection.host, port=redis_connection.port, db=redis_connection.db)
 
-
     def to_dict(self) -> dict:
         return {
             'queue_id': self.queue_id,
             'redis_connection': self.redis_connection
         }
-
 
 
 

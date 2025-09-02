@@ -1,12 +1,19 @@
 import sys
-from eric_redis_queues.prefabs import RedisSSEChannelsRepository, RedisStorageEngine
+
 from eric_sse.exception import NoMessagesException, InvalidListenerException
+from eric_redis_queues import RedisConnection
+from eric_redis_queues.repository import (RedisConnectionRepository,RedisBlockingQueuesConnectionFactory,
+                                          RedisSSEChannelRepository)
+
+redis_connection = RedisConnection()
+connection_factory = RedisBlockingQueuesConnectionFactory(redis_connection)
+connection_repository = RedisConnectionRepository(redis_connection=redis_connection)
+channel_repository = RedisSSEChannelRepository(redis_connection=redis_connection)
 
 try:
     channel_id = sys.argv[1]
     l_id = sys.argv[2]
-    repo = RedisSSEChannelsRepository(RedisStorageEngine(prefix='c'))
-    channels = {ch.id: ch for ch in repo.load_all()}
+    channels = {ch.id: ch for ch in channel_repository.load_all()}
     ch = channels[channel_id]
     ch.get_listener(listener_id=l_id).start()
 

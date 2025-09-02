@@ -13,7 +13,8 @@ readme = "README.md"
 dependencies = [
     "asyncio (>=3.4.3, <3.4.4)",
     "redis == 6.2.0",
-    "eric-sse == 2.1.0b8"
+    #"eric-sse == 2.1.0b12",
+    "eric-sse @ file:///home/luca/code/python/eric"
 ]
 
 [project.urls]

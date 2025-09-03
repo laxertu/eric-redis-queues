@@ -8,7 +8,7 @@ from eric_sse.prefabs import SSEChannelRepository
 from eric_sse.repository import KvStorage, ConnectionRepository
 from eric_redis_queues import (AbstractRedisQueue, RedisQueue, BlockingRedisQueue,
                                RedisConnection, PREFIX_CONNECTIONS, PREFIX_LISTENERS, PREFIX_CHANNELS, PREFIX_QUEUES,
-                               QUEUE_TYPE_DEFAULT, QUEUE_TYPE_BLOCKING)
+                               QUEUE_TYPE_DEFAULT, QUEUE_TYPE_BLOCKING, PREFIX_MESSAGES)
 from eric_sse.connection import ConnectionsFactory, Connection
 from eric_sse.interfaces import QueueRepositoryInterface
 from redis import Redis
@@ -95,6 +95,7 @@ class RedisBlockingQueuesConnectionFactory(AbstractRedisConnectionFactory):
 class RedisQueuesRepository(QueueRepositoryInterface):
     def __init__(self, redis_connection: RedisConnection):
         self._storage_engine = RedisStorage(prefix=PREFIX_QUEUES, redis_connection=redis_connection)
+        self._storage_engine_messages = RedisStorage(prefix=PREFIX_MESSAGES, redis_connection=redis_connection)
 
     def load(self, connection_id: str) -> AbstractRedisQueue:
         queue_data = self._storage_engine.fetch_one(connection_id)
@@ -111,7 +112,9 @@ class RedisQueuesRepository(QueueRepositoryInterface):
         self._storage_engine.upsert(connection_id, queue.to_dict())
 
     def delete(self, connection_id: str):
+        queue = self.load(connection_id)
         self._storage_engine.delete(connection_id)
+        self._storage_engine_messages.delete(queue.queue_id)
 
 class RedisConnectionRepository(ConnectionRepository):
     def __init__(self, redis_connection: RedisConnection):

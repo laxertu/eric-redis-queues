@@ -11,10 +11,15 @@ connection_repository = RedisConnectionRepository(redis_connection=redis_connect
 channel_repository = RedisSSEChannelRepository(redis_connection=redis_connection)
 
 try:
-    channel_id = sys.argv[1]
-    l_id = sys.argv[2]
+    channel_id = 'ab47b3b3-c72d-4759-a0fc-61d468a01d59'#sys.argv[1]
+    l_id = 'cb9afacc-c3fa-49ac-a534-2c8cdeb7c898'##sys.argv[2]
     channels = {ch.id: ch for ch in channel_repository.load_all()}
     ch = channels[channel_id]
+
+    for x in ch.get_connections():
+        print(x.id)
+
+    #exit(0)
     ch.get_listener(listener_id=l_id).start()
 
     while True:

@@ -1,16 +1,14 @@
 from eric_sse.message import SignedMessage, UniqueMessage, Message
 
 from eric_redis_queues import RedisConnection
-from eric_redis_queues.repository import (RedisConnectionRepository,
-                                          RedisBlockingQueuesConnectionFactory, RedisSSEChannelRepository)
+from eric_redis_queues.repository import RedisBlockingQueuesConnectionFactory, RedisSSEChannelRepository
 from eric_sse.prefabs import SSEChannel, SSEChannelRepository
 
 redis_connection = RedisConnection()
-connection_factory = RedisBlockingQueuesConnectionFactory(redis_connection)
-connection_repository = RedisConnectionRepository(redis_connection=redis_connection)
 channel_repository = RedisSSEChannelRepository(redis_connection=redis_connection)
 
 def do_test(repo_persist: SSEChannelRepository):
+    connection_factory = RedisBlockingQueuesConnectionFactory(redis_connection)
     ch = SSEChannel(connections_factory=connection_factory)
 
     sm = SignedMessage(sender_id='admin', msg_type='test', msg_payload='hi there')

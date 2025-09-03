@@ -4,6 +4,7 @@ A Redis implementation of persistence layer of eric-sse:
 
 * [Persistence layer documentation](https://laxertu.github.io/eric/persistence.html)
 * An example of [microservice](https://pypi.org/project/eric-api/) based on this project
+* Also [here](https://github.com/laxertu/eric-redis-queues/tree/master/e2e_tests) there is a simple flow for testing purposes
 
 # Reference
 

@@ -7,33 +7,30 @@ A Redis implementation of persistence layer of eric-sse:
 
 # Reference
 
+### *class* RedisConnection
+
+Bases: [`object`](https://docs.python.org/3/library/functions.html#object)
+
+RedisConnection(host: str = ‘127.0.0.1’, port: int = 6379, db: int = 0)
+
+#### \_\_init_\_(host='127.0.0.1', port=6379, db=0)
+
+* **Parameters:**
+  * **host** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
+  * **port** ([*int*](https://docs.python.org/3/library/functions.html#int))
+  * **db** ([*int*](https://docs.python.org/3/library/functions.html#int))
+* **Return type:**
+  None
+
 ### *class* AbstractRedisQueue
 
-Bases: [`PersistableQueue`](https://laxertu.github.io/eric/docs.html#eric_sse.persistence.PersistableQueue), [`ABC`](https://docs.python.org/3/library/abc.html#abc.ABC)
+Bases: [`Queue`](https://laxertu.github.io/eric/channels.html#eric_sse.queues.Queue), [`ABC`](https://docs.python.org/3/library/abc.html#abc.ABC)
 
-#### \_\_init_\_(listener_id, host='127.0.0.1', port=6379, db=0)
-
-* **Parameters:**
-  **listener_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
-
-#### *property* kv_key *: [str](https://docs.python.org/3/library/stdtypes.html#str)*
-
-The key to use when persisting object
-
-#### *property* kv_value_as_dict
-
-Returns value that will be persisted as a dictionary.
-
-#### setup_by_dict(setup)
-
-Does necessary post-creation setup of object given its persisted values
+#### \_\_init_\_(redis_connection, queue_id=None)
 
 * **Parameters:**
-  **setup** ([*dict*](https://docs.python.org/3/library/stdtypes.html#dict))
-
-#### *property* kv_constructor_params_as_dict *: [dict](https://docs.python.org/3/library/stdtypes.html#dict)*
-
-Class constructor parameters as dict
+  * **redis_connection** ([*RedisConnection*](#eric_redis_queues.RedisConnection))
+  * **queue_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str) *|* *None*)
 
 ### *class* RedisQueue
 
@@ -43,14 +40,14 @@ Bases: [`AbstractRedisQueue`](#eric_redis_queues.AbstractRedisQueue)
 
 Next message from the queue.
 
-Raises a [`NoMessagesException`](https://laxertu.github.io/eric/docs.html#eric_sse.exception.NoMessagesException) if the queue is empty.
+Raises a [`NoMessagesException`](https://laxertu.github.io/eric/exceptions.html#eric_sse.exception.NoMessagesException) if the queue is empty.
 
 * **Return type:**
   [*Any*](https://docs.python.org/3/library/typing.html#typing.Any) | None
 
 ### *class* BlockingRedisQueue
 
-Bases: [`RedisQueue`](#eric_redis_queues.RedisQueue)
+Bases: [`AbstractRedisQueue`](#eric_redis_queues.AbstractRedisQueue)
 
 Implements a blocking queue. See **pop()** documentation
 
@@ -61,86 +58,130 @@ Behaviour relies on [https://redis.io/docs/latest/commands/blpop/](https://redis
 * **Return type:**
   [*Any*](https://docs.python.org/3/library/typing.html#typing.Any) | None
 
-### *class* AbstractRedisConnectionRepository
+<a id="module-eric_redis_queues.repository"></a>
 
-Bases: [`ConnectionRepositoryInterface`](https://laxertu.github.io/eric/docs.html#eric_sse.persistence.ConnectionRepositoryInterface), [`ABC`](https://docs.python.org/3/library/abc.html#abc.ABC)
+### *class* RedisStorage
 
-#### \_\_init_\_(host='127.0.0.1', port=6379, db=0)
+Bases: [`KvStorage`](https://laxertu.github.io/eric/persistence.html#eric_sse.repository.KvStorage)
 
-#### *abstract* create_queue(listener_id)
+#### \_\_init_\_(prefix, redis_connection)
 
-Returns a concrete Queue instance.
+self.host: str = redis_connection.host
+self.port: int = redis_connection.port
+self.db: int = redis_connection.db
 
 * **Parameters:**
-  **listener_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str)) – Corresponding listener id
+  * **prefix** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
+  * **redis_connection** ([*RedisConnection*](#eric_redis_queues.RedisConnection))
+
+### *class* RedisListenerRepository
+
+Bases: [`ListenerRepositoryInterface`](https://laxertu.github.io/eric/persistence.html#eric_sse.interfaces.ListenerRepositoryInterface)
+
+#### \_\_init_\_(redis_connection)
+
+* **Parameters:**
+  **redis_connection** ([*RedisConnection*](#eric_redis_queues.RedisConnection))
+
+#### load(connection_id)
+
+Loads a listener given the connection id it belongs to.
+
+* **Parameters:**
+  **connection_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
+* **Return type:**
+  [*MessageQueueListener*](https://laxertu.github.io/eric/channels.html#eric_sse.listener.MessageQueueListener)
+
+#### delete(connection_id)
+
+Deleted a listener given the connection id it belongs to.
+
+* **Parameters:**
+  **connection_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
+
+### *class* AbstractRedisConnectionFactory
+
+Bases: [`ConnectionsFactory`](https://laxertu.github.io/eric/channels.html#eric_sse.connection.ConnectionsFactory), [`ABC`](https://docs.python.org/3/library/abc.html#abc.ABC)
+
+#### \_\_init_\_(redis_connection)
+
+* **Parameters:**
+  **redis_connection** ([*RedisConnection*](#eric_redis_queues.RedisConnection))
+
+### *class* RedisConnectionFactory
+
+Bases: [`AbstractRedisConnectionFactory`](#eric_redis_queues.repository.AbstractRedisConnectionFactory)
+
+#### create(listener=None)
+
+Creates a connection
+
+* **Parameters:**
+  **listener** ([*MessageQueueListener*](https://laxertu.github.io/eric/channels.html#eric_sse.listener.MessageQueueListener)) – If provided, assigns a concrete listener
+* **Return type:**
+  [*Connection*](https://laxertu.github.io/eric/channels.html#eric_sse.connection.Connection)
+
+### *class* RedisBlockingQueuesConnectionFactory
+
+Bases: [`AbstractRedisConnectionFactory`](#eric_redis_queues.repository.AbstractRedisConnectionFactory)
+
+#### create(listener=None)
+
+Creates a connection
+
+* **Parameters:**
+  **listener** ([*MessageQueueListener*](https://laxertu.github.io/eric/channels.html#eric_sse.listener.MessageQueueListener)) – If provided, assigns a concrete listener
+* **Return type:**
+  [*Connection*](https://laxertu.github.io/eric/channels.html#eric_sse.connection.Connection)
+
+### *class* RedisQueuesRepository
+
+Bases: [`QueueRepositoryInterface`](https://laxertu.github.io/eric/persistence.html#eric_sse.interfaces.QueueRepositoryInterface)
+
+#### \_\_init_\_(redis_connection)
+
+* **Parameters:**
+  **redis_connection** ([*RedisConnection*](#eric_redis_queues.RedisConnection))
+
+#### load(connection_id)
+
+Loads a queue given the connection id it belongs to.
+
+* **Parameters:**
+  **connection_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
 * **Return type:**
   [*AbstractRedisQueue*](#eric_redis_queues.AbstractRedisQueue)
 
-#### load_all()
+#### delete(connection_id)
 
-Returns an Iterable of all persisted connections
-
-* **Return type:**
-  [*Iterable*](https://docs.python.org/3/library/typing.html#typing.Iterable)[[*Connection*](https://laxertu.github.io/eric/docs.html#eric_sse.connection.Connection)]
-
-#### load(channel_id)
-
-Returns an Iterable of all persisted connections of a given channel
+Deletes a queue given the connection id it belongs to.
 
 * **Parameters:**
-  **channel_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
-* **Return type:**
-  [*Iterable*](https://docs.python.org/3/library/typing.html#typing.Iterable)[[*Connection*](https://laxertu.github.io/eric/docs.html#eric_sse.connection.Connection)]
+  **connection_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
 
-#### delete(channel_id, listener_id)
+### *class* RedisConnectionRepository
 
-Deletes a listener given its channel id and listener id.
+Bases: [`ConnectionRepository`](https://laxertu.github.io/eric/persistence.html#eric_sse.repository.ConnectionRepository)
 
-* **Parameters:**
-  * **channel_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
-  * **listener_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
-
-### *class* RedisConnectionsRepository
-
-Bases: [`AbstractRedisConnectionRepository`](#eric_redis_queues.AbstractRedisConnectionRepository)
-
-#### create_queue(listener_id)
-
-Returns a concrete Queue instance.
+#### \_\_init_\_(redis_connection)
 
 * **Parameters:**
-  **listener_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str)) – Corresponding listener id
-* **Return type:**
-  [*RedisQueue*](#eric_redis_queues.RedisQueue)
-
-### *class* RedisBlockingQueuesRepository
-
-Bases: [`AbstractRedisConnectionRepository`](#eric_redis_queues.AbstractRedisConnectionRepository)
-
-#### create_queue(listener_id)
-
-Creates a new blocking queue.
-
-* **Parameters:**
-  **listener_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
-* **Return type:**
-  [*BlockingRedisQueue*](#eric_redis_queues.BlockingRedisQueue)
+  **redis_connection** ([*RedisConnection*](#eric_redis_queues.RedisConnection))
 
 ### *class* RedisSSEChannelRepository
 
-Bases: [`ChannelRepositoryInterface`](https://laxertu.github.io/eric/docs.html#eric_sse.persistence.ChannelRepositoryInterface)
+Bases: [`SSEChannelRepository`](https://laxertu.github.io/eric/prefabs.html#eric_sse.prefabs.SSEChannelRepository)
 
-#### \_\_init_\_(host='127.0.0.1', port=6379, db=0, connection_factory='eric_redis_queues.RedisConnectionsRepository')
+#### \_\_init_\_(redis_connection)
 
 * **Parameters:**
-  * **host**
-  * **port**
-  * **db**
-  * **connection_factory** ([*str*](https://docs.python.org/3/library/stdtypes.html#str)) – Connection factory name to use to connect to Redis. Accepted literals are **‘RedisConnectionsRepository’** and **‘RedisBlockingQueuesRepository’**
+  **redis_connection** ([*RedisConnection*](#eric_redis_queues.RedisConnection))
 
-#### load()
+### *class* RedisSSEChannelBlockingQueuesRepository
 
-Returns all channels from the repository.
+Bases: [`SSEChannelRepository`](https://laxertu.github.io/eric/prefabs.html#eric_sse.prefabs.SSEChannelRepository)
 
-* **Return type:**
-  [*Iterable*](https://docs.python.org/3/library/typing.html#typing.Iterable)[[*SSEChannel*](https://laxertu.github.io/eric/docs.html#eric_sse.prefabs.SSEChannel)]
+#### \_\_init_\_(redis_connection)
+
+* **Parameters:**
+  **redis_connection** ([*RedisConnection*](#eric_redis_queues.RedisConnection))

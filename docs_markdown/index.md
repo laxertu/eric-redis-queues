@@ -66,10 +66,6 @@ Bases: [`KvStorage`](https://laxertu.github.io/eric/persistence.html#eric_sse.re
 
 #### \_\_init_\_(prefix, redis_connection)
 
-self.host: str = redis_connection.host
-self.port: int = redis_connection.port
-self.db: int = redis_connection.db
-
 * **Parameters:**
   * **prefix** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
   * **redis_connection** ([*RedisConnection*](#eric_redis_queues.RedisConnection))

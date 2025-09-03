@@ -6,7 +6,6 @@ from eric_redis_queues.repository import (AbstractRedisConnectionFactory, RedisC
 from eric_sse.prefabs import SSEChannel
 
 redis_connection = RedisConnection()
-
 connection_factory = RedisConnectionFactory(redis_connection=redis_connection)
 blocking_connection_factory = RedisBlockingQueuesConnectionFactory(redis_connection=redis_connection)
 

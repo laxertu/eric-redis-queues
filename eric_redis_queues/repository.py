@@ -17,11 +17,6 @@ from pickle import loads, dumps
 
 class RedisStorage(KvStorage):
     def __init__(self, prefix: str, redis_connection: RedisConnection):
-        """
-        self.host: str = redis_connection.host
-        self.port: int = redis_connection.port
-        self.db: int = redis_connection.db
-        """
         self._prefix = prefix
         self._client = Redis(host=redis_connection.host, port=redis_connection.port, db=redis_connection.db)
 

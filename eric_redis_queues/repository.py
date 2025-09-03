@@ -102,6 +102,7 @@ class RedisQueuesRepository(QueueRepositoryInterface):
         self._storage_engine = RedisStorage(prefix=PREFIX_QUEUES, redis_connection=redis_connection)
 
     def load(self, connection_id: str) -> AbstractRedisQueue:
+        print("loading")
         queue_data = self._storage_engine.fetch_one(connection_id)
         queue_type = queue_data.pop('type')
 
@@ -131,7 +132,5 @@ class RedisSSEChannelRepository(SSEChannelRepository):
         super().__init__(
             storage=RedisStorage(redis_connection=redis_connection, prefix=PREFIX_CHANNELS),
             connections_repository=RedisConnectionRepository(redis_connection=redis_connection),
-
-            # OJO!!!
-            connections_factory=RedisBlockingQueuesConnectionFactory(redis_connection)
+            connections_factory=RedisConnectionFactory(redis_connection)
         )

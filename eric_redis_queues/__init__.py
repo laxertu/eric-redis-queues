@@ -17,6 +17,7 @@ PREFIX_QUEUES = f'{PREFIX}:q'
 PREFIX_LISTENERS = f'{PREFIX}:l'
 PREFIX_CONNECTIONS = f'{PREFIX}:c'
 PREFIX_CHANNELS = f'{PREFIX}:chn'
+PREFIX_MESSAGES = f'{PREFIX}:m'
 
 CONNECTION_REPOSITORY_DEFAULT = 'eric_redis_queues.RedisConnectionsRepository'
 CONNECTION_REPOSITORY_BLOCKING = 'eric_redis_queues.RedisBlockingQueuesRepository'
@@ -50,7 +51,7 @@ class RedisQueue(AbstractRedisQueue):
 
     def pop(self) -> Any | None:
         try:
-            raw_value = self._client.lpop(f'{PREFIX_QUEUES}:{self.queue_id}')
+            raw_value = self._client.lpop(f'{PREFIX_MESSAGES}:{self.queue_id}')
             if raw_value is None:
                 raise NoMessagesException
             return loads(bytes(raw_value))
@@ -62,7 +63,7 @@ class RedisQueue(AbstractRedisQueue):
 
     def push(self, msg: MessageContract) -> None:
         try:
-            self._client.rpush(f'{PREFIX_QUEUES}:{self.queue_id}', dumps(msg))
+            self._client.rpush(f'{PREFIX_MESSAGES}:{self.queue_id}', dumps(msg))
         except Exception as e:
             raise RepositoryError(e)
 
@@ -77,12 +78,12 @@ class BlockingRedisQueue(AbstractRedisQueue):
     def pop(self) -> Any | None:
         """Behaviour relies on https://redis.io/docs/latest/commands/blpop/ , so calls to it with block program execution until a new message is pushed."""
 
-        k, v = self._client.blpop([f'{PREFIX_QUEUES}:{self.queue_id}'])
+        k, v = self._client.blpop([f'{PREFIX_MESSAGES}:{self.queue_id}'])
         return loads(bytes(v))
 
     def push(self, msg: MessageContract) -> None:
         try:
-            self._client.rpush(f'{PREFIX_QUEUES}:{self.queue_id}', dumps(msg))
+            self._client.rpush(f'{PREFIX_MESSAGES}:{self.queue_id}', dumps(msg))
         except Exception as e:
             raise RepositoryError(e)
 

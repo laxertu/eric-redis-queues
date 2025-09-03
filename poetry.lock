@@ -224,17 +224,15 @@ files = [
 
 [[package]]
 name = "eric-sse"
-version = "2.1.0b15"
+version = "2.1.0.1"
 description = "A lightweight message dispatcher based on SSE protocol data transfer objects format"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
-files = []
-develop = false
-
-[package.source]
-type = "directory"
-url = "../eric"
+files = [
+    {file = "eric_sse-2.1.0.1-py3-none-any.whl", hash = "sha256:a3637c07151c75c6dcf513c2f0ebc2871b2eb86f2fa235424bab4409903b94da"},
+    {file = "eric_sse-2.1.0.1.tar.gz", hash = "sha256:d372e3a6b22f337def11d52380ead85a1008e3295c7fa02df4a7b411764488f3"},
+]
 
 [[package]]
 name = "idna"
@@ -742,4 +740,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10, <3.12"
-content-hash = "f6098cb1733eef6969795865d710ad1b45487f39689ee86e45e8344ab5633280"
+content-hash = "c2093afc92c6d4a4b80c99c91250aa2bdfa89fbb7e60c719bf3a4b78ff8dddd4"

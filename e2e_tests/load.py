@@ -6,13 +6,16 @@ from eric_redis_queues.repository import (AbstractRedisConnectionFactory, RedisC
 from eric_sse.prefabs import SSEChannel
 
 redis_connection = RedisConnection()
-channel_repository = RedisSSEChannelRepository(redis_connection=redis_connection)
 
 connection_factory = RedisConnectionFactory(redis_connection=redis_connection)
 blocking_connection_factory = RedisBlockingQueuesConnectionFactory(redis_connection=redis_connection)
 
+
 def do_test(my_connection_factory: AbstractRedisConnectionFactory):
     ch = SSEChannel(connections_factory=my_connection_factory)
+    channel_repository = RedisSSEChannelRepository(
+        redis_connection=redis_connection
+    )
 
     sm = SignedMessage(sender_id='admin', msg_type='test', msg_payload='hi there')
     um = UniqueMessage(message_id='mgs_id0001', sender_id='administrator',

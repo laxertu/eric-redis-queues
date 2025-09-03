@@ -2,7 +2,7 @@
 
 A Redis implementation of persistence layer of eric-sse:
 
-* [Persistence layer documentation](https://laxertu.github.io/eric/docs.html#persistence)
+* [Persistence layer documentation](https://laxertu.github.io/eric/persistence.html)
 * An example of [microservice](https://pypi.org/project/eric-api/) based on this project
 
 # Reference

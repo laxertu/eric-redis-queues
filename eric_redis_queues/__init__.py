@@ -21,6 +21,9 @@ PREFIX_CHANNELS = f'{PREFIX}:chn'
 CONNECTION_REPOSITORY_DEFAULT = 'eric_redis_queues.RedisConnectionsRepository'
 CONNECTION_REPOSITORY_BLOCKING = 'eric_redis_queues.RedisBlockingQueuesRepository'
 
+QUEUE_TYPE_DEFAULT = 'default'
+QUEUE_TYPE_BLOCKING = 'blocking'
+
 @dataclass
 class RedisConnection:
     host: str = '127.0.0.1'
@@ -57,12 +60,16 @@ class RedisQueue(AbstractRedisQueue):
         except Exception as e:
             raise RepositoryError(e)
 
-
     def push(self, msg: MessageContract) -> None:
         try:
             self._client.rpush(f'{PREFIX_QUEUES}:{self.queue_id}', dumps(msg))
         except Exception as e:
             raise RepositoryError(e)
+
+    def to_dict(self) -> dict:
+        result = super().to_dict()
+        result['type'] = QUEUE_TYPE_DEFAULT
+        return result
 
 class BlockingRedisQueue(AbstractRedisQueue):
     """Implements a blocking queue. See **pop()** documentation"""
@@ -78,3 +85,8 @@ class BlockingRedisQueue(AbstractRedisQueue):
             self._client.rpush(f'{PREFIX_QUEUES}:{self.queue_id}', dumps(msg))
         except Exception as e:
             raise RepositoryError(e)
+
+    def to_dict(self) -> dict:
+        result = super().to_dict()
+        result['type'] = QUEUE_TYPE_BLOCKING
+        return result

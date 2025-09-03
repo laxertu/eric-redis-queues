@@ -2,17 +2,14 @@ import sys
 
 from eric_sse.exception import NoMessagesException, InvalidListenerException
 from eric_redis_queues import RedisConnection
-from eric_redis_queues.repository import (RedisConnectionRepository,RedisBlockingQueuesConnectionFactory,
-                                          RedisSSEChannelRepository)
+from eric_redis_queues.repository import RedisSSEChannelRepository
 
 redis_connection = RedisConnection()
-connection_factory = RedisBlockingQueuesConnectionFactory(redis_connection)
-connection_repository = RedisConnectionRepository(redis_connection=redis_connection)
 channel_repository = RedisSSEChannelRepository(redis_connection=redis_connection)
 
 try:
-    channel_id = 'ab47b3b3-c72d-4759-a0fc-61d468a01d59'#sys.argv[1]
-    l_id = 'cb9afacc-c3fa-49ac-a534-2c8cdeb7c898'##sys.argv[2]
+    channel_id = sys.argv[1]
+    l_id = sys.argv[2]
     channels = {ch.id: ch for ch in channel_repository.load_all()}
     ch = channels[channel_id]
 

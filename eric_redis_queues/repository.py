@@ -1,15 +1,17 @@
 from abc import ABC
 from typing import Iterable
 
+from eric_sse.exception import RepositoryError
 from eric_sse.interfaces import ListenerRepositoryInterface
 from eric_sse.listener import MessageQueueListener
 from eric_sse.prefabs import SSEChannelRepository
 from eric_sse.repository import KvStorage, ConnectionRepository
 from eric_redis_queues import (AbstractRedisQueue, RedisQueue, BlockingRedisQueue,
-                               RedisConnection, PREFIX_CONNECTIONS, PREFIX_LISTENERS, PREFIX_CHANNELS, PREFIX_QUEUES)
+                               RedisConnection, PREFIX_CONNECTIONS, PREFIX_LISTENERS, PREFIX_CHANNELS, PREFIX_QUEUES,
+                               QUEUE_TYPE_DEFAULT, QUEUE_TYPE_BLOCKING)
 from eric_sse.connection import ConnectionsFactory, Connection
 from eric_sse.interfaces import QueueRepositoryInterface
-from redis import Redis
+from redis import Redis, RedisError
 from pickle import loads, dumps
 
 
@@ -25,21 +27,36 @@ class RedisStorage(KvStorage):
 
 
     def fetch_by_prefix(self, prefix: str) -> Iterable[any]:
-        for redis_key in self._client.scan_iter(f"{self._prefix}:{prefix}:*"):
-            yield loads(self._client.get(redis_key.decode()))
+        try:
+            for redis_key in self._client.scan_iter(f"{self._prefix}:{prefix}:*"):
+                yield loads(self._client.get(redis_key.decode()))
+        except Exception as e:
+            raise RepositoryError(e) from None
 
     def fetch_all(self) -> Iterable[any]:
-        for redis_key in self._client.scan_iter(f"{self._prefix}:*"):
-            yield loads(self._client.get(redis_key.decode()))
+        try:
+            for redis_key in self._client.scan_iter(f"{self._prefix}:*"):
+                yield loads(self._client.get(redis_key.decode()))
+        except Exception as e:
+            raise RepositoryError(e) from None
 
     def upsert(self, key: str, value: any):
-        self._client.set(f'{self._prefix}:{key}', dumps(value))
+        try:
+            self._client.set(f'{self._prefix}:{key}', dumps(value))
+        except Exception as e:
+            raise RepositoryError(e) from None
 
     def fetch_one(self, key: str) -> any:
-        return loads(self._client.get(f'{self._prefix}:{key}'))
+        try:
+            return loads(self._client.get(f'{self._prefix}:{key}'))
+        except Exception as e:
+            raise RepositoryError(e) from None
 
     def delete(self, key: str):
-        self._client.delete(f'{self._prefix}:{key}')
+        try:
+            self._client.delete(f'{self._prefix}:{key}')
+        except Exception as e:
+            raise RepositoryError(e) from None
 
 class RedisListenerRepository(ListenerRepositoryInterface):
     def __init__(self, redis_connection: RedisConnection):
@@ -86,7 +103,14 @@ class RedisQueuesRepository(QueueRepositoryInterface):
 
     def load(self, connection_id: str) -> AbstractRedisQueue:
         queue_data = self._storage_engine.fetch_one(connection_id)
-        return RedisQueue(**queue_data)
+        queue_type = queue_data.pop('type')
+
+        if queue_type == QUEUE_TYPE_DEFAULT:
+            return RedisQueue(**queue_data)
+        elif queue_type == QUEUE_TYPE_BLOCKING:
+            return BlockingRedisQueue(**queue_data)
+        else:
+            raise RepositoryError(f"Unknown queue type: {queue_type}")
 
     def persist(self, connection_id: str, queue: AbstractRedisQueue):
         self._storage_engine.upsert(connection_id, queue.to_dict())

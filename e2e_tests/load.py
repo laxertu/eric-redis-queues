@@ -1,15 +1,18 @@
 from eric_sse.message import SignedMessage, UniqueMessage, Message
 
 from eric_redis_queues import RedisConnection
-from eric_redis_queues.repository import RedisBlockingQueuesConnectionFactory, RedisSSEChannelRepository
-from eric_sse.prefabs import SSEChannel, SSEChannelRepository
+from eric_redis_queues.repository import (AbstractRedisConnectionFactory, RedisConnectionFactory,
+                                          RedisBlockingQueuesConnectionFactory, RedisSSEChannelRepository)
+from eric_sse.prefabs import SSEChannel
 
 redis_connection = RedisConnection()
 channel_repository = RedisSSEChannelRepository(redis_connection=redis_connection)
 
-def do_test(repo_persist: SSEChannelRepository):
-    connection_factory = RedisBlockingQueuesConnectionFactory(redis_connection)
-    ch = SSEChannel(connections_factory=connection_factory)
+connection_factory = RedisConnectionFactory(redis_connection=redis_connection)
+blocking_connection_factory = RedisBlockingQueuesConnectionFactory(redis_connection=redis_connection)
+
+def do_test(my_connection_factory: AbstractRedisConnectionFactory):
+    ch = SSEChannel(connections_factory=my_connection_factory)
 
     sm = SignedMessage(sender_id='admin', msg_type='test', msg_payload='hi there')
     um = UniqueMessage(message_id='mgs_id0001', sender_id='administrator',
@@ -22,14 +25,13 @@ def do_test(repo_persist: SSEChannelRepository):
     ch.broadcast(um)
     ch.broadcast(m)
 
-    repo_persist.persist(ch)
-
-do_test(channel_repository)
+    channel_repository.persist(ch)
 
 
-#print("Default")
-#do_test(channel_repository)
-#print("Blocking")
-#do_test(blocking_repository)
+print("Default")
+do_test(connection_factory)
+print("Blocking")
+do_test(blocking_connection_factory)
+
 
 

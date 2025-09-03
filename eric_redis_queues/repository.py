@@ -11,7 +11,7 @@ from eric_redis_queues import (AbstractRedisQueue, RedisQueue, BlockingRedisQueu
                                QUEUE_TYPE_DEFAULT, QUEUE_TYPE_BLOCKING)
 from eric_sse.connection import ConnectionsFactory, Connection
 from eric_sse.interfaces import QueueRepositoryInterface
-from redis import Redis, RedisError
+from redis import Redis
 from pickle import loads, dumps
 
 
@@ -102,7 +102,6 @@ class RedisQueuesRepository(QueueRepositoryInterface):
         self._storage_engine = RedisStorage(prefix=PREFIX_QUEUES, redis_connection=redis_connection)
 
     def load(self, connection_id: str) -> AbstractRedisQueue:
-        print("loading")
         queue_data = self._storage_engine.fetch_one(connection_id)
         queue_type = queue_data.pop('type')
 
@@ -133,4 +132,12 @@ class RedisSSEChannelRepository(SSEChannelRepository):
             storage=RedisStorage(redis_connection=redis_connection, prefix=PREFIX_CHANNELS),
             connections_repository=RedisConnectionRepository(redis_connection=redis_connection),
             connections_factory=RedisConnectionFactory(redis_connection)
+        )
+
+class RedisSSEChannelBlockingQueuesRepository(SSEChannelRepository):
+    def __init__(self, redis_connection: RedisConnection):
+        super().__init__(
+            storage=RedisStorage(redis_connection=redis_connection, prefix=PREFIX_CHANNELS),
+            connections_repository=RedisConnectionRepository(redis_connection=redis_connection),
+            connections_factory=RedisBlockingQueuesConnectionFactory(redis_connection)
         )

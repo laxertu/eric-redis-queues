@@ -18,4 +18,5 @@ Reference
     :show-inheritance:
     :members:
     :member-order: bysource
+    :undoc-members:
 

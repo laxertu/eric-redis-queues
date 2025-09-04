@@ -71,6 +71,36 @@ Bases: [`KvStorage`](https://laxertu.github.io/eric/persistence.html#eric_sse.re
   * **prefix** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
   * **redis_connection** ([*RedisConnection*](#eric_redis_queues.RedisConnection))
 
+#### fetch_by_prefix(prefix)
+
+* **Parameters:**
+  **prefix** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
+* **Return type:**
+  [*Iterable*](https://docs.python.org/3/library/typing.html#typing.Iterable)[any]
+
+#### fetch_all()
+
+* **Return type:**
+  [*Iterable*](https://docs.python.org/3/library/typing.html#typing.Iterable)[any]
+
+#### upsert(key, value)
+
+* **Parameters:**
+  * **key** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
+  * **value** (*any*)
+
+#### fetch_one(key)
+
+* **Parameters:**
+  **key** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
+* **Return type:**
+  any
+
+#### delete(key)
+
+* **Parameters:**
+  **key** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
+
 ### *class* RedisListenerRepository
 
 Bases: [`ListenerRepositoryInterface`](https://laxertu.github.io/eric/persistence.html#eric_sse.interfaces.ListenerRepositoryInterface)
@@ -88,6 +118,12 @@ Loads a listener given the connection id it belongs to.
   **connection_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
 * **Return type:**
   [*MessageQueueListener*](https://laxertu.github.io/eric/channels.html#eric_sse.listener.MessageQueueListener)
+
+#### persist(connection_id, listener)
+
+* **Parameters:**
+  * **connection_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
+  * **listener** ([*MessageQueueListener*](https://laxertu.github.io/eric/channels.html#eric_sse.listener.MessageQueueListener))
 
 #### delete(connection_id)
 
@@ -148,6 +184,12 @@ Loads a queue given the connection id it belongs to.
   **connection_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
 * **Return type:**
   [*AbstractRedisQueue*](#eric_redis_queues.AbstractRedisQueue)
+
+#### persist(connection_id, queue)
+
+* **Parameters:**
+  * **connection_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
+  * **queue** ([*AbstractRedisQueue*](#eric_redis_queues.AbstractRedisQueue))
 
 #### delete(connection_id)
 

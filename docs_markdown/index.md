@@ -25,7 +25,7 @@ RedisConnection(host: str = ‘127.0.0.1’, port: int = 6379, db: int = 0)
 
 ### *class* AbstractRedisQueue
 
-Bases: [`Queue`](https://laxertu.github.io/eric/channels.html#eric_sse.queues.Queue), [`ABC`](https://docs.python.org/3/library/abc.html#abc.ABC)
+Bases: [`Queue`](https://laxertu.github.io/eric/entities.html#eric_sse.queues.Queue), [`ABC`](https://docs.python.org/3/library/abc.html#abc.ABC)
 
 #### \_\_init_\_(redis_connection, queue_id=None)
 
@@ -117,13 +117,13 @@ Loads a listener given the connection id it belongs to.
 * **Parameters:**
   **connection_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
 * **Return type:**
-  [*MessageQueueListener*](https://laxertu.github.io/eric/channels.html#eric_sse.listener.MessageQueueListener)
+  [*MessageQueueListener*](https://laxertu.github.io/eric/entities.html#eric_sse.listener.MessageQueueListener)
 
 #### persist(connection_id, listener)
 
 * **Parameters:**
   * **connection_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
-  * **listener** ([*MessageQueueListener*](https://laxertu.github.io/eric/channels.html#eric_sse.listener.MessageQueueListener))
+  * **listener** ([*MessageQueueListener*](https://laxertu.github.io/eric/entities.html#eric_sse.listener.MessageQueueListener))
 
 #### delete(connection_id)
 
@@ -134,7 +134,7 @@ Deleted a listener given the connection id it belongs to.
 
 ### *class* AbstractRedisConnectionFactory
 
-Bases: [`ConnectionsFactory`](https://laxertu.github.io/eric/channels.html#eric_sse.connection.ConnectionsFactory), [`ABC`](https://docs.python.org/3/library/abc.html#abc.ABC)
+Bases: [`ConnectionsFactory`](https://laxertu.github.io/eric/entities.html#eric_sse.connection.ConnectionsFactory), [`ABC`](https://docs.python.org/3/library/abc.html#abc.ABC)
 
 #### \_\_init_\_(redis_connection)
 
@@ -150,9 +150,9 @@ Bases: [`AbstractRedisConnectionFactory`](#eric_redis_queues.repository.Abstract
 Creates a connection
 
 * **Parameters:**
-  **listener** ([*MessageQueueListener*](https://laxertu.github.io/eric/channels.html#eric_sse.listener.MessageQueueListener)) – If provided, assigns a concrete listener
+  **listener** ([*MessageQueueListener*](https://laxertu.github.io/eric/entities.html#eric_sse.listener.MessageQueueListener)) – If provided, assigns a concrete listener
 * **Return type:**
-  [*Connection*](https://laxertu.github.io/eric/channels.html#eric_sse.connection.Connection)
+  [*Connection*](https://laxertu.github.io/eric/entities.html#eric_sse.connection.Connection)
 
 ### *class* RedisBlockingQueuesConnectionFactory
 
@@ -163,9 +163,9 @@ Bases: [`AbstractRedisConnectionFactory`](#eric_redis_queues.repository.Abstract
 Creates a connection
 
 * **Parameters:**
-  **listener** ([*MessageQueueListener*](https://laxertu.github.io/eric/channels.html#eric_sse.listener.MessageQueueListener)) – If provided, assigns a concrete listener
+  **listener** ([*MessageQueueListener*](https://laxertu.github.io/eric/entities.html#eric_sse.listener.MessageQueueListener)) – If provided, assigns a concrete listener
 * **Return type:**
-  [*Connection*](https://laxertu.github.io/eric/channels.html#eric_sse.connection.Connection)
+  [*Connection*](https://laxertu.github.io/eric/entities.html#eric_sse.connection.Connection)
 
 ### *class* RedisQueuesRepository
 

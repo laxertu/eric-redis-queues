@@ -20,20 +20,25 @@ class RedisStorage(KvStorage):
         self._prefix = prefix
         self._client = Redis(host=redis_connection.host, port=redis_connection.port, db=redis_connection.db)
 
+    def _create_object(self, redis_key: str) -> any:
+
+        result = loads(self._client.get(redis_key))
+        if result is None:
+            raise ItemNotFound(redis_key) from None
+
+        return result
 
     def fetch_by_prefix(self, prefix: str) -> Iterable[any]:
         try:
             for redis_key in self._client.scan_iter(f"{self._prefix}:{prefix}:*"):
-                yield loads(self._client.get(redis_key.decode()))
+                yield self._create_object(redis_key.decode())
+
         except Exception as e:
             raise RepositoryError(e) from None
 
     def fetch_all(self) -> Iterable[any]:
-        try:
-            for redis_key in self._client.scan_iter(f"{self._prefix}:*"):
-                yield loads(self._client.get(redis_key.decode()))
-        except Exception as e:
-            raise RepositoryError(e) from None
+        for redis_key in self._client.scan_iter(f"{self._prefix}:*"):
+            yield self._create_object(redis_key.decode())
 
     def upsert(self, key: str, value: any):
         try:
@@ -42,14 +47,7 @@ class RedisStorage(KvStorage):
             raise RepositoryError(e) from None
 
     def fetch_one(self, key: str) -> any:
-        try:
-            result = loads(self._client.get(f'{self._prefix}:{key}'))
-            if result is None:
-                raise ItemNotFound(key) from None
-            return result
-
-        except Exception as e:
-            raise RepositoryError(e)
+        return self._create_object(f'{self._prefix}:{key}')
 
     def delete(self, key: str):
         try:

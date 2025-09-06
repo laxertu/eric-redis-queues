@@ -22,11 +22,14 @@ class RedisStorage(KvStorage):
 
     def _create_object(self, redis_key: str) -> any:
 
-        result = loads(self._client.get(redis_key))
-        if result is None:
-            raise ItemNotFound(redis_key) from None
+        try:
+            raw_result = self._client.get(redis_key)
+            if raw_result is None:
+                raise ItemNotFound(redis_key)
+            return loads(raw_result)
+        except Exception as e:
+            raise RepositoryError(e)
 
-        return result
 
     def fetch_by_prefix(self, prefix: str) -> Iterable[any]:
         try:

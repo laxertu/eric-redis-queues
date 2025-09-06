@@ -27,6 +27,8 @@ class RedisStorage(KvStorage):
             if raw_result is None:
                 raise ItemNotFound(redis_key)
             return loads(raw_result)
+        except ItemNotFound as e:
+            raise e
         except Exception as e:
             raise RepositoryError(e)
 

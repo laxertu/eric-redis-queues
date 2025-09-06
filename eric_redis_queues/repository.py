@@ -11,9 +11,9 @@ from eric_redis_queues import (AbstractRedisQueue, RedisQueue, BlockingRedisQueu
                                QUEUE_TYPE_DEFAULT, QUEUE_TYPE_BLOCKING, PREFIX_MESSAGES)
 from eric_sse.connection import ConnectionsFactory, Connection
 from eric_sse.interfaces import QueueRepositoryInterface
+from eric_sse.exception import InvalidListenerException, InvalidConnectionException, ItemNotFound
 from redis import Redis
 from pickle import loads, dumps
-
 
 class RedisStorage(KvStorage):
     def __init__(self, prefix: str, redis_connection: RedisConnection):
@@ -43,9 +43,13 @@ class RedisStorage(KvStorage):
 
     def fetch_one(self, key: str) -> any:
         try:
-            return loads(self._client.get(f'{self._prefix}:{key}'))
+            result = loads(self._client.get(f'{self._prefix}:{key}'))
+            if result is None:
+                raise ItemNotFound(key) from None
+            return result
+
         except Exception as e:
-            raise RepositoryError(e) from None
+            raise RepositoryError(e)
 
     def delete(self, key: str):
         try:
@@ -58,7 +62,10 @@ class RedisListenerRepository(ListenerRepositoryInterface):
         self._storage_engine = RedisStorage(prefix=PREFIX_LISTENERS, redis_connection=redis_connection)
 
     def load(self, connection_id: str) -> MessageQueueListener:
-        return self._storage_engine.fetch_one(connection_id)
+        try:
+            return self._storage_engine.fetch_one(connection_id)
+        except ItemNotFound as e:
+            raise InvalidListenerException(e) from None
 
     def persist(self, connection_id: str, listener: MessageQueueListener):
         self._storage_engine.upsert(connection_id, listener)
@@ -98,7 +105,12 @@ class RedisQueuesRepository(QueueRepositoryInterface):
         self._storage_engine_messages = RedisStorage(prefix=PREFIX_MESSAGES, redis_connection=redis_connection)
 
     def load(self, connection_id: str) -> AbstractRedisQueue:
-        queue_data = self._storage_engine.fetch_one(connection_id)
+
+        try:
+            queue_data = self._storage_engine.fetch_one(connection_id)
+        except ItemNotFound as e:
+            raise InvalidConnectionException(e) from None
+
         queue_type = queue_data.pop('type')
 
         if queue_type == QUEUE_TYPE_DEFAULT:

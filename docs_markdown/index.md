@@ -121,6 +121,8 @@ Loads a listener given the connection id it belongs to.
 
 #### persist(connection_id, listener)
 
+Persists listener and assign to connection.
+
 * **Parameters:**
   * **connection_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))
   * **listener** ([*MessageQueueListener*](https://laxertu.github.io/eric/entities.html#eric_sse.listener.MessageQueueListener))
@@ -186,6 +188,8 @@ Loads a queue given the connection id it belongs to.
   [*AbstractRedisQueue*](#eric_redis_queues.AbstractRedisQueue)
 
 #### persist(connection_id, queue)
+
+Persists queue and assign to connection.
 
 * **Parameters:**
   * **connection_id** ([*str*](https://docs.python.org/3/library/stdtypes.html#str))

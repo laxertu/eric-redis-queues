@@ -23,7 +23,7 @@ class RedisStorage(KvStorage):
     def _create_object(self, redis_key: str) -> any:
 
         try:
-            raw_result = self._client.get(redis_key)
+            raw_result: bytes = self._client.get(redis_key)
             if raw_result is None:
                 raise ItemNotFound(redis_key)
             return loads(raw_result)

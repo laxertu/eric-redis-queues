@@ -13,13 +13,17 @@ readme = "README.md"
 dependencies = [
     "asyncio (>=3.4.3, <3.4.4)",
     "redis == 6.2.0",
-    "eric-sse == 2.1.1.2",
+    "eric-sse",
 ]
 
 [project.urls]
 Homepage = "https://laxertu.github.io/eric-redis-queues"
 Repository = "https://github.com/laxertu/eric-redis-queues"
 Issues = "https://github.com/laxertu/eric/issues"
+
+# Temporary: eric-sse 3.0.0 is not released yet, use local checkout
+[tool.poetry.dependencies]
+eric-sse = {path = "../eric", develop = true}
 
 [build-system]
 requires = ["poetry-core"]

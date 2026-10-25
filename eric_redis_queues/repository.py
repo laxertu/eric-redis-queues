@@ -15,6 +15,11 @@ from eric_sse.exception import InvalidListenerException, InvalidConnectionExcept
 from redis import Redis
 from pickle import loads, dumps
 
+
+def escape_glob(value: str) -> str:
+    """Escapes Redis glob-style pattern special characters"""
+    return ''.join(f'\\{c}' if c in '*?[]\\' else c for c in value)
+
 class RedisStorage(KvStorage):
     def __init__(self, prefix: str, redis_connection: RedisConnection):
         self._prefix = prefix
@@ -33,17 +38,22 @@ class RedisStorage(KvStorage):
             raise RepositoryError(e)
 
 
-    def fetch_by_prefix(self, prefix: str) -> Iterable[any]:
+    def _scan(self, pattern: str) -> Iterable[any]:
+        """Keys deleted while results are iterated are skipped"""
         try:
-            for redis_key in self._client.scan_iter(f"{self._prefix}:{prefix}:*"):
-                yield self._create_object(redis_key.decode())
-
+            for redis_key in self._client.scan_iter(pattern):
+                try:
+                    yield self._create_object(redis_key.decode())
+                except ItemNotFound:
+                    continue
         except Exception as e:
             raise RepositoryError(e) from None
 
+    def fetch_by_prefix(self, prefix: str) -> Iterable[any]:
+        return self._scan(f"{self._prefix}:{escape_glob(prefix)}*")
+
     def fetch_all(self) -> Iterable[any]:
-        for redis_key in self._client.scan_iter(f"{self._prefix}:*"):
-            yield self._create_object(redis_key.decode())
+        return self._scan(f"{self._prefix}:*")
 
     def upsert(self, key: str, value: any):
         try:
@@ -127,7 +137,10 @@ class RedisQueuesRepository(QueueRepositoryInterface):
         self._storage_engine.upsert(connection_id, queue.to_dict())
 
     def delete(self, connection_id: str):
-        queue = self.load(connection_id)
+        try:
+            queue = self.load(connection_id)
+        except InvalidConnectionException:
+            return
         self._storage_engine.delete(connection_id)
         self._storage_engine_messages.delete(queue.queue_id)
 

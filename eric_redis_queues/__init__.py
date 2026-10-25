@@ -39,6 +39,24 @@ class AbstractRedisQueue(Queue, ABC):
         self.redis_connection = redis_connection
         self._client = Redis(host=redis_connection.host, port=redis_connection.port, db=redis_connection.db)
 
+    def __getstate__(self) -> dict:
+        """Redis client is not picklable, it is rebuilt on unpickling"""
+        state = self.__dict__.copy()
+        del state['_client']
+        return state
+
+    def __setstate__(self, state: dict):
+        self.__dict__.update(state)
+        c = self.redis_connection
+        self._client = Redis(host=c.host, port=c.port, db=c.db)
+
+    def clear(self):
+        """Removes all queued messages"""
+        try:
+            self._client.delete(f'{PREFIX_MESSAGES}:{self.queue_id}')
+        except Exception as e:
+            raise RepositoryError(e)
+
     def to_dict(self) -> dict:
         return {
             'queue_id': self.queue_id,

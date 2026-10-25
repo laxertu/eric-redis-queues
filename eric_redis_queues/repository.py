@@ -1,18 +1,19 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Iterable
 
 from eric_sse.exception import RepositoryError
 from eric_sse.interfaces import ListenerRepositoryInterface
 from eric_sse.listener import MessageQueueListener
 from eric_sse.prefabs import SSEChannelRepository
-from eric_sse.repository import KvStorage, ConnectionRepository
+from eric_sse.repository import KvStorage, ConnectionRepository, KvQueueRepository
 from eric_redis_queues import (AbstractRedisQueue, RedisQueue, BlockingRedisQueue,
-                               RedisConnection, PREFIX_CONNECTIONS, PREFIX_LISTENERS, PREFIX_CHANNELS, PREFIX_QUEUES,
-                               QUEUE_TYPE_DEFAULT, QUEUE_TYPE_BLOCKING, PREFIX_MESSAGES)
-from eric_sse.connection import ConnectionsFactory, Connection
+                               RedisConnection, PREFIX, PREFIX_CONNECTIONS, PREFIX_LISTENERS, PREFIX_CHANNELS, PREFIX_QUEUES,
+                               QUEUE_TYPE_DEFAULT, QUEUE_TYPE_BLOCKING)
+from eric_sse.connection import DefaultConnectionsFactory
 from eric_sse.interfaces import QueueRepositoryInterface
 from eric_sse.exception import InvalidListenerException, InvalidConnectionException, ItemNotFound
 from redis import Redis
+from eric_sse.facade import Facade
 from pickle import loads, dumps
 
 
@@ -86,36 +87,26 @@ class RedisListenerRepository(ListenerRepositoryInterface):
     def delete(self, connection_id: str):
         self._storage_engine.delete(connection_id)
 
-class AbstractRedisConnectionFactory(ConnectionsFactory, ABC):
-    def __init__(self, redis_connection: RedisConnection):
+class AbstractRedisConnectionFactory(DefaultConnectionsFactory, ABC):
+    def __init__(self, redis_connection: RedisConnection, listener_class: type[MessageQueueListener] = MessageQueueListener):
         self._redis_connection = redis_connection
-        self._storage_engine: RedisStorage = RedisStorage(
-            prefix=PREFIX_CONNECTIONS, redis_connection=self._redis_connection
-        )
+        super().__init__(listener_class=listener_class, queue_factory=self._create_queue)
+
+    @abstractmethod
+    def _create_queue(self) -> AbstractRedisQueue:
+        ...
 
 class RedisConnectionFactory(AbstractRedisConnectionFactory):
-    def create(self, listener: MessageQueueListener | None = None) -> Connection:
-        if listener is None:
-            listener = MessageQueueListener()
-        return Connection(
-            listener=listener,
-            queue=RedisQueue(self._redis_connection, queue_id=listener.id)
-        )
+    def _create_queue(self) -> RedisQueue:
+        return RedisQueue(self._redis_connection)
 
 class RedisBlockingQueuesConnectionFactory(AbstractRedisConnectionFactory):
-
-    def create(self, listener: MessageQueueListener | None = None) -> Connection:
-        if listener is None:
-            listener = MessageQueueListener()
-        return Connection(
-            listener=listener,
-            queue=BlockingRedisQueue(self._redis_connection, queue_id=listener.id)
-        )
+    def _create_queue(self) -> BlockingRedisQueue:
+        return BlockingRedisQueue(self._redis_connection)
 
 class RedisQueuesRepository(QueueRepositoryInterface):
     def __init__(self, redis_connection: RedisConnection):
         self._storage_engine = RedisStorage(prefix=PREFIX_QUEUES, redis_connection=redis_connection)
-        self._storage_engine_messages = RedisStorage(prefix=PREFIX_MESSAGES, redis_connection=redis_connection)
 
     def load(self, connection_id: str) -> AbstractRedisQueue:
 
@@ -141,8 +132,8 @@ class RedisQueuesRepository(QueueRepositoryInterface):
             queue = self.load(connection_id)
         except InvalidConnectionException:
             return
+        queue.clear()
         self._storage_engine.delete(connection_id)
-        self._storage_engine_messages.delete(queue.queue_id)
 
 class RedisConnectionRepository(ConnectionRepository):
     def __init__(self, redis_connection: RedisConnection):
@@ -167,3 +158,31 @@ class RedisSSEChannelBlockingQueuesRepository(SSEChannelRepository):
             connections_repository=RedisConnectionRepository(redis_connection=redis_connection),
             connections_factory=RedisBlockingQueuesConnectionFactory(redis_connection)
         )
+
+
+class RedisKvQueueRepository(KvQueueRepository):
+    """Queue repository for :class:`~eric_sse.facade.Facade`: deletes queued messages together with the queue"""
+    def delete(self, connection_id: str):
+        try:
+            self.load(connection_id).clear()
+        except ItemNotFound:
+            return
+        super().delete(connection_id)
+
+
+PREFIX_FACADE = f'{PREFIX}:f'
+
+
+def create_facade(
+        redis_connection: RedisConnection,
+        blocking_queues: bool = False,
+        listener_class: type[MessageQueueListener] = MessageQueueListener
+) -> Facade:
+    """Builds a :class:`~eric_sse.facade.Facade` persisting everything in Redis"""
+    queue_class = BlockingRedisQueue if blocking_queues else RedisQueue
+    return Facade(
+        storage=RedisStorage(prefix=PREFIX_FACADE, redis_connection=redis_connection),
+        listener_class=listener_class,
+        queue_factory=lambda: queue_class(redis_connection),
+        queue_repository_class=RedisKvQueueRepository
+    )

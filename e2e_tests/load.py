@@ -1,40 +1,40 @@
-from eric_sse.message import SignedMessage, UniqueMessage, Message
+"""
+Producer side of a two-process check: persists a channel with one connection, then dispatches messages.
 
-from eric_redis_queues import RedisConnection
-from eric_redis_queues.repository import (AbstractRedisConnectionFactory, RedisConnectionFactory,
-                                          RedisBlockingQueuesConnectionFactory, RedisSSEChannelRepository)
+Usage: python -m e2e_tests.load, then run the printed command.
+"""
+import os
+
+from eric_sse.message import Message, SignedMessage
 from eric_sse.prefabs import SSEChannel
+from redis import Redis
 
-redis_connection = RedisConnection()
-connection_factory = RedisConnectionFactory(redis_connection=redis_connection)
-blocking_connection_factory = RedisBlockingQueuesConnectionFactory(redis_connection=redis_connection)
+from eric_redis_queues.repository import redis_channel_repository_builder
 
-
-def do_test(my_connection_factory: AbstractRedisConnectionFactory):
-    ch = SSEChannel(connections_factory=my_connection_factory)
-    channel_repository = RedisSSEChannelRepository(
-        redis_connection=redis_connection
-    )
-
-    sm = SignedMessage(sender_id='admin', msg_type='test', msg_payload='hi there')
-    um = UniqueMessage(message_id='mgs_id0001', sender_id='administrator',
-                       message=Message(msg_type='test2', msg_payload={'a': 1}))
-    m = Message(msg_type='testsimple', msg_payload='hi, simple')
-    l = ch.add_listener()
-    result = f'python run.py {ch.id} {l.id}'
-    ch.broadcast(sm)
-    ch.broadcast(um)
-    ch.broadcast(m)
-
-    channel_repository.persist(ch)
-    return result
+redis_client = Redis(
+    host=os.environ.get('REDIS_HOST', '127.0.0.1'),
+    port=int(os.environ.get('REDIS_PORT', '6379')),
+    db=int(os.environ.get('REDIS_DB', '0')),
+)
 
 
-print("Default")
-cmd = do_test(connection_factory)
-print(f'{cmd} default')
-print("Blocking")
-cmd = do_test(blocking_connection_factory)
-print(f'{cmd} blocking')
+def build_repository():
+    return redis_channel_repository_builder(SSEChannel, redis_client).build()
 
 
+def load() -> str:
+    repository = build_repository()
+    channel = repository.create({})
+    connection = channel.add_connection()
+    repository.persist(channel)
+
+    # Queues write messages to Redis themselves: no persist needed after dispatching
+    channel.broadcast(SignedMessage(sender_id='admin', msg_type='test', msg_payload='hi there'))
+    channel.broadcast(Message(msg_type='test2', msg_payload={'a': 1}, msg_id='msg_id0001'))
+    channel.broadcast(Message(msg_type='testsimple', msg_payload='hi, simple'))
+
+    return f'python -m e2e_tests.run {channel.id} {connection.id}'
+
+
+if __name__ == '__main__':
+    print(load())

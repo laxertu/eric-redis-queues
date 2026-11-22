@@ -1,7 +1,6 @@
-from eric_redis_queues import RedisConnection
-from eric_redis_queues.repository import RedisSSEChannelRepository
+"""Deletes every channel persisted by e2e_tests.load, with its connections and messages."""
+from e2e_tests.load import build_repository
 
-repo = RedisSSEChannelRepository(redis_connection=RedisConnection())
-
-for channel in repo.load_all():
-    repo.delete(channel.id)
+repository = build_repository()
+for channel in list(repository.load_all()):
+    repository.delete(channel.id)

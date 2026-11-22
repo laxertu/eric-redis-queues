@@ -1,44 +1,37 @@
+"""
+Consumer side of a two-process check: loads a channel persisted by e2e_tests.load and delivers its messages.
+
+Usage: python -m e2e_tests.run <channel id> <connection id>
+"""
+import asyncio
 import sys
 
-from eric_sse.exception import NoMessagesException, InvalidListenerException
-from eric_redis_queues import RedisConnection
-from eric_redis_queues.repository import RedisSSEChannelRepository, RedisSSEChannelBlockingQueuesRepository
+from eric_sse.exception import InvalidConnectionException, ItemNotFound, NoMessagesException
 
-redis_connection = RedisConnection()
-channel_repository = RedisSSEChannelRepository(redis_connection=redis_connection)
+from e2e_tests.load import build_repository
 
 try:
-    channel_id = sys.argv[1]
-    l_id = sys.argv[2]
-    repo_type = sys.argv[3]
+    channel_id, connection_id = sys.argv[1:3]
+except ValueError:
+    print(__doc__)
+    sys.exit(1)
 
-    channels = {ch.id: ch for ch in channel_repository.load_all()}
-    ch = channels[channel_id]
+try:
+    channel = build_repository().load_one(channel_id)
+    connection = channel.get_connection(connection_id)
+except ItemNotFound:
+    print('Invalid channel id')
+    sys.exit(1)
+except InvalidConnectionException:
+    print('Invalid connection id')
+    sys.exit(1)
 
-    if repo_type == 'default':
-        channel_repository = RedisSSEChannelRepository(redis_connection=redis_connection)
-    elif repo_type == 'blocking':
-        channel_repository = RedisSSEChannelBlockingQueuesRepository(redis_connection=redis_connection)
-
-    for x in ch.get_connections():
-        print(x.id)
-
-    ch.get_listener(listener_id=l_id).start()
-
-    while True:
-        try:
-            x = ch.deliver_next(l_id)
-            print("DELIVERED", x.type, x.payload)
-        except NoMessagesException:
-            print('done')
-            exit(0)
-
-except IndexError:
-    print("Usage: python run.py <listener id>")
-    sys.exit(0)
-except KeyError:
-    print("Invalid channel id")
-except InvalidListenerException:
-    print("Invalid listener id")
-    sys.exit(0)
-
+connection.listener.start()
+while True:
+    try:
+        # Waits up to 1 second for each message, as a blocking consumer would
+        msg = asyncio.run(channel.wait_next(connection_id, 1))
+    except NoMessagesException:
+        print('done')
+        break
+    print('DELIVERED', msg.type, msg.payload)

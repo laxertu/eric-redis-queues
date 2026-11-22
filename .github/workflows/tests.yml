@@ -1,0 +1,50 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11"]
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: 6379
+      REDIS_DB: 15
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install
+        run: pip install .
+
+      # Tests are skipped when Redis is not reachable: fail instead, so a broken service can't pass as green
+      - name: Run tests
+        shell: bash  # Explicit, so that pipefail is on: failures are not hidden by tee
+        run: |
+          python -m unittest discover -s tests -t . -v 2>&1 | tee unittest.log
+          if grep -q 'skipped=' unittest.log; then
+            echo "::error::Tests were skipped: Redis not reachable"
+            exit 1
+          fi

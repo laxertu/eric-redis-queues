@@ -1,93 +1,151 @@
-from abc import ABC, abstractmethod
-from typing import Any
+"""
+Redis support for eric-sse.
+
+* :class:`RedisStorage`: a :class:`~eric_sse.repository.KvStorage`, to persist channels, connections, listeners and queues;
+* :class:`RedisQueue`: a durable :class:`~eric_sse.queues.Queue`, whose messages live in a Redis list.
+
+Both take a ``redis.Redis`` client: connection details (host, credentials, TLS, pool, timeouts) are up to the
+application. See :func:`eric_redis_queues.repository.redis_channel_repository_builder` to wire them together.
+"""
 from pickle import dumps, loads
-from dataclasses import dataclass
+from typing import Any, Iterable
 
 from redis import Redis
-from eric_sse import get_logger
-from eric_sse.exception import NoMessagesException, RepositoryError
+
+from eric_sse import generate_uuid, get_logger
+from eric_sse.exception import ItemNotFound, NoMessagesException, RepositoryError
 from eric_sse.message import MessageContract
 from eric_sse.queues import Queue
-from eric_sse import generate_uuid
+from eric_sse.repository import KvStorage
 
 logger = get_logger()
 
 PREFIX = 'eric-redis-queues'
-PREFIX_QUEUES = f'{PREFIX}:q'
-PREFIX_LISTENERS = f'{PREFIX}:l'
-PREFIX_CONNECTIONS = f'{PREFIX}:c'
-PREFIX_CHANNELS = f'{PREFIX}:chn'
+PREFIX_STORAGE = f'{PREFIX}:kv:'
+"""Default key prefix of :class:`RedisStorage`."""
 PREFIX_MESSAGES = f'{PREFIX}:m'
+"""Key prefix of the lists holding :class:`RedisQueue` messages."""
 
-CONNECTION_REPOSITORY_DEFAULT = 'eric_redis_queues.RedisConnectionsRepository'
-CONNECTION_REPOSITORY_BLOCKING = 'eric_redis_queues.RedisBlockingQueuesRepository'
-
-QUEUE_TYPE_DEFAULT = 'default'
-QUEUE_TYPE_BLOCKING = 'blocking'
-
-@dataclass
-class RedisConnection:
-    host: str = '127.0.0.1'
-    port: int = 6379
-    db: int = 0
-
-class AbstractRedisQueue(Queue, ABC):
-
-    def __init__(self, redis_connection: RedisConnection, queue_id: str = None):
-        super().__init__()
-        self.queue_id = queue_id if queue_id else generate_uuid()
-        self.redis_connection = redis_connection
-        self._client = Redis(host=redis_connection.host, port=redis_connection.port, db=redis_connection.db)
-
-    def to_dict(self) -> dict:
-        return {
-            'queue_id': self.queue_id,
-            'redis_connection': self.redis_connection
-        }
+_GLOB_SPECIAL_CHARS = '\\*?[]'
 
 
+def _check_client(client: Redis) -> Redis:
+    """Values are pickled bytes: a client decoding responses to strings would corrupt them."""
+    if client.get_connection_kwargs().get('decode_responses'):
+        raise ValueError('The Redis client must not decode responses (decode_responses=False)')
+    return client
 
-class RedisQueue(AbstractRedisQueue):
 
-    def pop(self) -> Any | None:
+def _escape_glob(value: str) -> str:
+    return ''.join(f'\\{c}' if c in _GLOB_SPECIAL_CHARS else c for c in value)
+
+
+class RedisStorage(KvStorage):
+    """
+    :class:`~eric_sse.repository.KvStorage` backed by Redis. Values are pickled.
+
+    :param client: Must not decode responses (``decode_responses=False``, the default).
+    :param prefix: Prepended to every key. Storages sharing a Redis database must have prefixes that are not
+        prefixes of each other.
+    """
+
+    def __init__(self, client: Redis, prefix: str = PREFIX_STORAGE):
+        self.__client = _check_client(client)
+        self.__prefix = prefix
+
+    @property
+    def prefix(self) -> str:
+        return self.__prefix
+
+    def fetch_by_prefix(self, prefix: str) -> Iterable[Any]:
+        # Keys and values are fetched before yielding, so callers can delete keys while iterating
         try:
-            raw_value = self._client.lpop(f'{PREFIX_MESSAGES}:{self.queue_id}')
-            if raw_value is None:
-                raise NoMessagesException
-            return loads(bytes(raw_value))
-
-        except NoMessagesException:
-            raise
+            keys = list(self.__client.scan_iter(match=f'{_escape_glob(self.__prefix + prefix)}*', count=1000))
+            raw_values = self.__client.mget(keys) if keys else []
         except Exception as e:
-            raise RepositoryError(e)
+            raise RepositoryError(e) from None
+        # A key deleted between SCAN and MGET is skipped
+        return [loads(raw) for raw in raw_values if raw is not None]
 
-    def push(self, msg: MessageContract) -> None:
+    def upsert(self, key: str, value: Any):
         try:
-            self._client.rpush(f'{PREFIX_MESSAGES}:{self.queue_id}', dumps(msg))
+            self.__client.set(f'{self.__prefix}{key}', dumps(value))
         except Exception as e:
-            raise RepositoryError(e)
+            raise RepositoryError(e) from None
 
-    def to_dict(self) -> dict:
-        result = super().to_dict()
-        result['type'] = QUEUE_TYPE_DEFAULT
-        return result
-
-class BlockingRedisQueue(AbstractRedisQueue):
-    """Implements a blocking queue. See **pop()** documentation"""
-
-    def pop(self) -> Any | None:
-        """Behaviour relies on https://redis.io/docs/latest/commands/blpop/ , so calls to it with block program execution until a new message is pushed."""
-
-        k, v = self._client.blpop([f'{PREFIX_MESSAGES}:{self.queue_id}'])
-        return loads(bytes(v))
-
-    def push(self, msg: MessageContract) -> None:
+    def fetch_one(self, key: str) -> Any:
         try:
-            self._client.rpush(f'{PREFIX_MESSAGES}:{self.queue_id}', dumps(msg))
+            raw = self.__client.get(f'{self.__prefix}{key}')
         except Exception as e:
-            raise RepositoryError(e)
+            raise RepositoryError(e) from None
+        if raw is None:
+            raise ItemNotFound(key=key)
+        return loads(raw)
 
-    def to_dict(self) -> dict:
-        result = super().to_dict()
-        result['type'] = QUEUE_TYPE_BLOCKING
-        return result
+    def delete(self, key: str):
+        try:
+            self.__client.delete(f'{self.__prefix}{key}')
+        except Exception as e:
+            raise RepositoryError(e) from None
+
+
+class RedisQueue(Queue):
+    """
+    Durable queue: messages are pickled and kept in a Redis list, so several processes can share it.
+
+    It can't be pickled, as its client can't: persist it with
+    :class:`~eric_redis_queues.repository.RedisQueueRepository`, that stores its id and gives it a client when loading it.
+
+    :meth:`pop` without timeout returns immediately, as eric-sse requires. With a timeout it waits for a message,
+    relying on `BLPOP <https://redis.io/docs/latest/commands/blpop/>`_, so it doesn't poll. This replaces
+    ``BlockingRedisQueue`` of previous versions: callers choose whether to wait, e.g. with
+    :meth:`~eric_sse.entities.AbstractChannel.wait_next` or ``queue.pop(timeout=...)``.
+    :meth:`~eric_sse.queues.Queue.wait_pop` is inherited: it runs :meth:`pop` in a worker thread.
+
+    :param client: Must not decode responses (``decode_responses=False``, the default). A ``socket_timeout``, if set,
+        must be longer than the waits.
+    :param queue_id: Identifies the Redis list. Defaults to a new uuid.
+    """
+
+    def __init__(self, client: Redis, queue_id: str | None = None):
+        self.__client = _check_client(client)
+        self.__queue_id = queue_id if queue_id is not None else generate_uuid()
+
+    def __getstate__(self):
+        raise TypeError('RedisQueue can\'t be pickled: persist it with RedisQueueRepository, that stores its id')
+
+    @property
+    def queue_id(self) -> str:
+        return self.__queue_id
+
+    @property
+    def _key(self) -> str:
+        return f'{PREFIX_MESSAGES}:{self.__queue_id}'
+
+    def pop(self, timeout: float = 0) -> Any:
+        try:
+            if timeout > 0:
+                # BLPOP blocks forever with a 0 timeout, so it's only used with a positive one
+                result = self.__client.blpop([self._key], timeout=timeout)
+                raw_value = result[1] if result is not None else None
+            else:
+                raw_value = self.__client.lpop(self._key)
+        except Exception as e:
+            raise RepositoryError(e) from None
+
+        if raw_value is None:
+            raise NoMessagesException
+        return loads(raw_value)
+
+    def push(self, message: MessageContract) -> None:
+        try:
+            self.__client.rpush(self._key, dumps(message))
+        except Exception as e:
+            raise RepositoryError(e) from None
+
+    def purge(self) -> None:
+        """Deletes all its messages."""
+        try:
+            self.__client.delete(self._key)
+        except Exception as e:
+            raise RepositoryError(e) from None

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; Eric Redis queues 1.0.6 documentation</title>
+    <title>Index &#8212; Eric Redis queues 3.0.0 documentation</title>
   
   
   
@@ -35,7 +35,7 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="_static/documentation_options.js?v=d728ce32"></script>
+    <script src="_static/documentation_options.js?v=6a41c08d"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -131,7 +131,7 @@
   
   
   
-    <p class="title logo__title">Eric Redis queues 1.0.6 documentation</p>
+    <p class="title logo__title">Eric Redis queues 3.0.0 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -147,7 +147,10 @@
  </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
     </div>
 </nav></div>
     </div>
@@ -300,8 +303,6 @@ document.write(`
 
 <div class="genindex-jumpbox">
  <a href="#_"><strong>_</strong></a>
- | <a href="#A"><strong>A</strong></a>
- | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
@@ -316,70 +317,32 @@ document.write(`
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#eric_redis_queues.repository.AbstractRedisConnectionFactory.__init__">__init__() (AbstractRedisConnectionFactory method)</a>
+      <li><a href="index.html#eric_redis_queues.RedisQueue.__init__">__init__() (RedisQueue method)</a>
 
       <ul>
-        <li><a href="index.html#eric_redis_queues.AbstractRedisQueue.__init__">(AbstractRedisQueue method)</a>
+        <li><a href="index.html#eric_redis_queues.repository.RedisQueueRepository.__init__">(RedisQueueRepository method)</a>
 </li>
-        <li><a href="index.html#eric_redis_queues.RedisConnection.__init__">(RedisConnection method)</a>
-</li>
-        <li><a href="index.html#eric_redis_queues.repository.RedisConnectionRepository.__init__">(RedisConnectionRepository method)</a>
-</li>
-        <li><a href="index.html#eric_redis_queues.repository.RedisListenerRepository.__init__">(RedisListenerRepository method)</a>
-</li>
-        <li><a href="index.html#eric_redis_queues.repository.RedisQueuesRepository.__init__">(RedisQueuesRepository method)</a>
-</li>
-        <li><a href="index.html#eric_redis_queues.repository.RedisSSEChannelBlockingQueuesRepository.__init__">(RedisSSEChannelBlockingQueuesRepository method)</a>
-</li>
-        <li><a href="index.html#eric_redis_queues.repository.RedisSSEChannelRepository.__init__">(RedisSSEChannelRepository method)</a>
-</li>
-        <li><a href="index.html#eric_redis_queues.repository.RedisStorage.__init__">(RedisStorage method)</a>
+        <li><a href="index.html#eric_redis_queues.RedisStorage.__init__">(RedisStorage method)</a>
 </li>
       </ul></li>
-  </ul></td>
-</tr></table>
-
-<h2 id="A">A</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#eric_redis_queues.repository.AbstractRedisConnectionFactory">AbstractRedisConnectionFactory (class in eric_redis_queues.repository)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#eric_redis_queues.AbstractRedisQueue">AbstractRedisQueue (class in eric_redis_queues)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="B">B</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#eric_redis_queues.BlockingRedisQueue">BlockingRedisQueue (class in eric_redis_queues)</a>
-</li>
   </ul></td>
 </tr></table>
 
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#eric_redis_queues.repository.RedisBlockingQueuesConnectionFactory.create">create() (RedisBlockingQueuesConnectionFactory method)</a>
-
-      <ul>
-        <li><a href="index.html#eric_redis_queues.repository.RedisConnectionFactory.create">(RedisConnectionFactory method)</a>
+      <li><a href="index.html#eric_redis_queues.repository.RedisQueueRepository.create">create() (RedisQueueRepository method)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#eric_redis_queues.repository.RedisListenerRepository.delete">delete() (RedisListenerRepository method)</a>
+      <li><a href="index.html#eric_redis_queues.repository.RedisQueueRepository.delete">delete() (RedisQueueRepository method)</a>
 
       <ul>
-        <li><a href="index.html#eric_redis_queues.repository.RedisQueuesRepository.delete">(RedisQueuesRepository method)</a>
-</li>
-        <li><a href="index.html#eric_redis_queues.repository.RedisStorage.delete">(RedisStorage method)</a>
+        <li><a href="index.html#eric_redis_queues.RedisStorage.delete">(RedisStorage method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -410,13 +373,11 @@ document.write(`
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#eric_redis_queues.repository.RedisStorage.fetch_all">fetch_all() (RedisStorage method)</a>
+      <li><a href="index.html#eric_redis_queues.RedisStorage.fetch_by_prefix">fetch_by_prefix() (RedisStorage method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#eric_redis_queues.repository.RedisStorage.fetch_by_prefix">fetch_by_prefix() (RedisStorage method)</a>
-</li>
-      <li><a href="index.html#eric_redis_queues.repository.RedisStorage.fetch_one">fetch_one() (RedisStorage method)</a>
+      <li><a href="index.html#eric_redis_queues.RedisStorage.fetch_one">fetch_one() (RedisStorage method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -424,12 +385,8 @@ document.write(`
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#eric_redis_queues.repository.RedisListenerRepository.load">load() (RedisListenerRepository method)</a>
-
-      <ul>
-        <li><a href="index.html#eric_redis_queues.repository.RedisQueuesRepository.load">(RedisQueuesRepository method)</a>
+      <li><a href="index.html#eric_redis_queues.repository.RedisQueueRepository.load">load() (RedisQueueRepository method)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -451,47 +408,33 @@ document.write(`
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#eric_redis_queues.repository.RedisListenerRepository.persist">persist() (RedisListenerRepository method)</a>
-
-      <ul>
-        <li><a href="index.html#eric_redis_queues.repository.RedisQueuesRepository.persist">(RedisQueuesRepository method)</a>
+      <li><a href="index.html#eric_redis_queues.repository.RedisQueueRepository.persist">persist() (RedisQueueRepository method)</a>
 </li>
-      </ul></li>
+      <li><a href="index.html#eric_redis_queues.RedisQueue.pop">pop() (RedisQueue method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#eric_redis_queues.BlockingRedisQueue.pop">pop() (BlockingRedisQueue method)</a>
-
-      <ul>
-        <li><a href="index.html#eric_redis_queues.RedisQueue.pop">(RedisQueue method)</a>
+      <li><a href="index.html#eric_redis_queues.PREFIX_MESSAGES">PREFIX_MESSAGES (in module eric_redis_queues)</a>
 </li>
-      </ul></li>
+      <li><a href="index.html#eric_redis_queues.PREFIX_STORAGE">PREFIX_STORAGE (in module eric_redis_queues)</a>
+</li>
+      <li><a href="index.html#eric_redis_queues.RedisQueue.purge">purge() (RedisQueue method)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#eric_redis_queues.repository.RedisBlockingQueuesConnectionFactory">RedisBlockingQueuesConnectionFactory (class in eric_redis_queues.repository)</a>
+      <li><a href="index.html#eric_redis_queues.repository.redis_channel_repository_builder">redis_channel_repository_builder() (in module eric_redis_queues.repository)</a>
 </li>
-      <li><a href="index.html#eric_redis_queues.RedisConnection">RedisConnection (class in eric_redis_queues)</a>
-</li>
-      <li><a href="index.html#eric_redis_queues.repository.RedisConnectionFactory">RedisConnectionFactory (class in eric_redis_queues.repository)</a>
-</li>
-      <li><a href="index.html#eric_redis_queues.repository.RedisConnectionRepository">RedisConnectionRepository (class in eric_redis_queues.repository)</a>
-</li>
-      <li><a href="index.html#eric_redis_queues.repository.RedisListenerRepository">RedisListenerRepository (class in eric_redis_queues.repository)</a>
+      <li><a href="index.html#eric_redis_queues.RedisQueue">RedisQueue (class in eric_redis_queues)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#eric_redis_queues.RedisQueue">RedisQueue (class in eric_redis_queues)</a>
+      <li><a href="index.html#eric_redis_queues.repository.RedisQueueRepository">RedisQueueRepository (class in eric_redis_queues.repository)</a>
 </li>
-      <li><a href="index.html#eric_redis_queues.repository.RedisQueuesRepository">RedisQueuesRepository (class in eric_redis_queues.repository)</a>
-</li>
-      <li><a href="index.html#eric_redis_queues.repository.RedisSSEChannelBlockingQueuesRepository">RedisSSEChannelBlockingQueuesRepository (class in eric_redis_queues.repository)</a>
-</li>
-      <li><a href="index.html#eric_redis_queues.repository.RedisSSEChannelRepository">RedisSSEChannelRepository (class in eric_redis_queues.repository)</a>
-</li>
-      <li><a href="index.html#eric_redis_queues.repository.RedisStorage">RedisStorage (class in eric_redis_queues.repository)</a>
+      <li><a href="index.html#eric_redis_queues.RedisStorage">RedisStorage (class in eric_redis_queues)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -499,7 +442,7 @@ document.write(`
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#eric_redis_queues.repository.RedisStorage.upsert">upsert() (RedisStorage method)</a>
+      <li><a href="index.html#eric_redis_queues.RedisStorage.upsert">upsert() (RedisStorage method)</a>
 </li>
   </ul></td>
 </tr></table>

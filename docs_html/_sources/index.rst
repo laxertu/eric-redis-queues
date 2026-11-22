@@ -20,3 +20,8 @@ Reference
     :member-order: bysource
     :undoc-members:
 
+
+.. toctree::
+   :maxdepth: 1
+
+   changelog

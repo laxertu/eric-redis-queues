@@ -24,11 +24,9 @@ handlers) before `build()`.
 
 * `RedisConnectionRepository`, `RedisSSEChannelRepository`, `RedisListenerRepository` and the connection factories
   are replaced by `redis_channel_repository_builder`.
-* `BlockingRedisQueue` and `RedisSSEChannelBlockingQueuesRepository` are removed. In eric-sse 3 every queue's `pop()`
-  without timeout returns immediately, and waiting is up to the caller: use `await channel.wait_next(connection_id,
-  timeout)` or `channel.message_stream(connection_id)` in async code, `connection.queue.pop(timeout=...)` in sync
-  code. `RedisQueue` waits with BLPOP, without polling. A queue waiting forever on `pop()` would hang
-  `deliver_next` and `DataProcessingChannel.process_queue`.
+* `BlockingRedisQueue` and `RedisSSEChannelBlockingQueuesRepository` are removed: in eric-sse 3 waiting is up to the
+  caller, e.g. `await channel.wait_next(connection_id, timeout)`. See the
+  [changelog](docs/source/changelog.rst#blocking-queues) for why, and how to get the same behaviour.
 * Keys layout changed: data persisted by 2.x is not readable by 3.x.
 
 *Tests*

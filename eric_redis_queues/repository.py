@@ -7,7 +7,7 @@ from eric_sse.repository import KvStorage, PrefixedStorage
 
 from eric_redis_queues import RedisQueue, RedisStorage
 
-__all__ = ['RedisStorage', 'RedisQueueRepository', 'redis_channel_repository_builder']
+__all__ = ['RedisQueueRepository', 'redis_channel_repository_builder']
 
 
 class RedisQueueRepository(QueueRepositoryInterface[RedisQueue]):

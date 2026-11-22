@@ -1,66 +1,65 @@
-from typing import Callable
+from redis import Redis
 
 from eric_sse.builder import ChannelRepositoryBuilder
+from eric_sse.interfaces import C, QueueRepositoryInterface
 from eric_sse.exception import ItemNotFound
-from eric_sse.interfaces import C
-from eric_sse.queues import Queue
-from eric_sse.repository import KvQueueRepository, KvStorage, PrefixedStorage
+from eric_sse.repository import KvStorage, PrefixedStorage
 
-from eric_redis_queues import RedisConnection, RedisQueue, RedisStorage
+from eric_redis_queues import RedisQueue, RedisStorage
 
 __all__ = ['RedisStorage', 'RedisQueueRepository', 'redis_channel_repository_builder']
 
 
-class RedisQueueRepository(KvQueueRepository):
+class RedisQueueRepository(QueueRepositoryInterface[RedisQueue]):
     """
-    :class:`~eric_sse.repository.KvQueueRepository` that also deletes the messages of the queues it deletes.
+    Creates, persists and loads :class:`~eric_redis_queues.RedisQueue` instances.
 
-    Queues keep their messages in Redis, outside the storage: without this, deleting a connection would leave
-    its messages behind. Queues having a ``purge()`` method, as :class:`~eric_redis_queues.RedisQueue` does, are
-    purged.
+    Only queue ids are stored: loaded queues get **client**. Deleting a queue deletes its messages too.
 
-    :param storage: Storage for queues identity.
-    :param queue_factory: Called once per connection to create its queue.
+    :param client: Given to the queues it creates and loads, see :class:`~eric_redis_queues.RedisQueue`.
+    :param storage: Storage for queue ids, keyed by connection id.
     """
 
-    def __init__(self, storage: KvStorage, queue_factory: Callable[[], Queue]):
-        super().__init__(storage, queue_factory=queue_factory)
+    def __init__(self, client: Redis, storage: KvStorage):
+        self.__client = client
+        self.__storage = storage
+
+    def create(self) -> RedisQueue:
+        return RedisQueue(self.__client)
+
+    def load(self, connection_id: str) -> RedisQueue:
+        return RedisQueue(self.__client, queue_id=self.__storage.fetch_one(connection_id)['queue_id'])
+
+    def persist(self, connection_id: str, queue: RedisQueue):
+        self.__storage.upsert(connection_id, {'queue_id': queue.queue_id})
 
     def delete(self, connection_id: str):
         try:
             queue = self.load(connection_id)
         except ItemNotFound:
             return
-        purge = getattr(queue, 'purge', None)
-        if callable(purge):
-            purge()
-        super().delete(connection_id)
+        queue.purge()
+        self.__storage.delete(connection_id)
 
 
 def redis_channel_repository_builder(
         channel_class: type[C],
-        redis_connection: RedisConnection | None = None,
-        queue_factory: Callable[[], Queue] | None = None,
+        client: Redis,
         prefix: str | None = None
 ) -> ChannelRepositoryBuilder[C]:
     """
     Returns a :class:`~eric_sse.builder.ChannelRepositoryBuilder` persisting everything in Redis::
 
-        repository = redis_channel_repository_builder(SSEChannel, RedisConnection()).build()
+        repository = redis_channel_repository_builder(SSEChannel, Redis(host='localhost')).build()
 
     It can be further configured before building, e.g. with listeners or error handlers.
 
     :param channel_class: e.g. :class:`~eric_sse.prefabs.SSEChannel`.
-    :param redis_connection: Defaults to a local Redis.
-    :param queue_factory: Creates connections queues. Defaults to :class:`~eric_redis_queues.RedisQueue`.
+    :param client: Must not decode responses (``decode_responses=False``, the default).
     :param prefix: Key prefix of the storage, see :class:`~eric_redis_queues.RedisStorage`.
     """
-    redis_connection = redis_connection if redis_connection is not None else RedisConnection()
-    storage = RedisStorage(redis_connection) if prefix is None else RedisStorage(redis_connection, prefix=prefix)
-    if queue_factory is None:
-        queue_factory = lambda: RedisQueue(redis_connection)  # noqa: E731
-
+    storage = RedisStorage(client) if prefix is None else RedisStorage(client, prefix=prefix)
     return (
         ChannelRepositoryBuilder(channel_class, storage)
-        .queues_repository(RedisQueueRepository(PrefixedStorage(storage, 'queue:'), queue_factory=queue_factory))
+        .queues_repository(RedisQueueRepository(client, PrefixedStorage(storage, 'queue:')))
     )

@@ -7,14 +7,15 @@ pip install eric-redis-queues
 *Usage*
 
 ```python
+from redis import Redis
 from eric_sse.prefabs import SSEChannel
-from eric_redis_queues import RedisConnection
 from eric_redis_queues.repository import redis_channel_repository_builder
 
-redis_connection = RedisConnection(host='127.0.0.1', port=6379, db=0)
+# Any redis-py client, configured as the application needs (credentials, TLS, pool, ...), without decode_responses
+client = Redis(host='127.0.0.1', port=6379, db=0)
 
 # Channels, connections, listeners and queues persisted in Redis; messages kept in Redis lists
-repository = redis_channel_repository_builder(SSEChannel, redis_connection).build()
+repository = redis_channel_repository_builder(SSEChannel, client).build()
 ```
 
 The returned builder is an eric-sse `ChannelRepositoryBuilder`, so it can be further configured (listeners, error
@@ -27,6 +28,8 @@ handlers) before `build()`.
 * `BlockingRedisQueue` and `RedisSSEChannelBlockingQueuesRepository` are removed: in eric-sse 3 waiting is up to the
   caller, e.g. `await channel.wait_next(connection_id, timeout)`. See the
   [changelog](docs/source/changelog.rst#blocking-queues) for why, and how to get the same behaviour.
+* `RedisConnection` is removed: `RedisStorage`, `RedisQueue`, `RedisQueueRepository` and
+  `redis_channel_repository_builder` take a `redis.Redis` client.
 * Keys layout changed: data persisted by 2.x is not readable by 3.x.
 
 *Tests*

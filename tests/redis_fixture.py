@@ -10,9 +10,11 @@ from unittest import SkipTest
 
 from redis.exceptions import ConnectionError as RedisConnectionError
 
-from eric_redis_queues import PREFIX, RedisConnection
+from redis import Redis
 
-REDIS_CONNECTION = RedisConnection(
+from eric_redis_queues import PREFIX
+
+REDIS_CLIENT = Redis(
     host=os.environ.get('REDIS_HOST', '127.0.0.1'),
     port=int(os.environ.get('REDIS_PORT', '6379')),
     db=int(os.environ.get('REDIS_DB', '15')),
@@ -20,15 +22,12 @@ REDIS_CONNECTION = RedisConnection(
 
 
 def clean_redis() -> None:
-    client = REDIS_CONNECTION.create_client()
     try:
-        keys = list(client.scan_iter(match=f'{PREFIX}:*', count=1000))
+        keys = list(REDIS_CLIENT.scan_iter(match=f'{PREFIX}:*', count=1000))
     except RedisConnectionError as e:
-        raise SkipTest(f'Redis not reachable at {REDIS_CONNECTION}: {e}') from None
-    finally:
-        client.close()
+        raise SkipTest(f'Redis not reachable: {e}') from None
     if keys:
-        client.delete(*keys)
+        REDIS_CLIENT.delete(*keys)
 
 
 class RedisFixture:

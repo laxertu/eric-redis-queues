@@ -5,33 +5,35 @@ from unittest import TestCase
 from eric_sse.exception import ItemNotFound, NoMessagesException
 from eric_sse.message import Message
 from eric_sse.prefabs import SSEChannel
+from redis import Redis
 
 from eric_redis_queues import RedisQueue, RedisStorage
-from eric_redis_queues.repository import redis_channel_repository_builder
-from tests.redis_fixture import REDIS_CONNECTION, RedisFixture
+from eric_redis_queues.repository import RedisQueueRepository, redis_channel_repository_builder
+from tests.redis_fixture import REDIS_CLIENT, RedisFixture
 
 
 class RedisQueueTestCase(RedisFixture, TestCase):
 
     def test_queues_with_the_same_id_share_messages(self):
-        producer = RedisQueue(REDIS_CONNECTION)
-        consumer = RedisQueue(REDIS_CONNECTION, queue_id=producer.queue_id)
+        producer = RedisQueue(REDIS_CLIENT)
+        consumer = RedisQueue(REDIS_CLIENT, queue_id=producer.queue_id)
 
         producer.push(Message(msg_type='test'))
 
         self.assertEqual('test', consumer.pop().type)
 
-    def test_unpickled_queue_keeps_its_identity_and_messages(self):
-        queue = RedisQueue(REDIS_CONNECTION)
-        queue.push(Message(msg_type='test'))
+    def test_pickling_is_rejected_with_an_explanation(self):
+        with self.assertRaisesRegex(TypeError, 'RedisQueueRepository'):
+            pickle.dumps(RedisQueue(REDIS_CLIENT))
 
-        unpickled = pickle.loads(pickle.dumps(queue))
-
-        self.assertEqual((queue.queue_id, queue.redis_connection), (unpickled.queue_id, unpickled.redis_connection))
-        self.assertEqual('test', unpickled.pop().type)
+    def test_clients_decoding_responses_are_rejected(self):
+        client = Redis(decode_responses=True)  # Never connects: the check is on its configuration
+        for create in (lambda: RedisQueue(client), lambda: RedisStorage(client)):
+            with self.assertRaises(ValueError):
+                create()
 
     def test_purge_deletes_messages(self):
-        queue = RedisQueue(REDIS_CONNECTION)
+        queue = RedisQueue(REDIS_CLIENT)
         queue.push(Message(msg_type='test'))
 
         queue.purge()
@@ -43,7 +45,7 @@ class RedisQueueTestCase(RedisFixture, TestCase):
 class RedisStorageTestCase(RedisFixture, TestCase):
 
     def test_prefix_glob_characters_are_matched_literally(self):
-        storage = RedisStorage(REDIS_CONNECTION)
+        storage = RedisStorage(REDIS_CLIENT)
         storage.upsert('a*:1', 'star')
         storage.upsert('ab:1', 'other')
         storage.upsert('a?[]\\:1', 'specials')
@@ -52,27 +54,41 @@ class RedisStorageTestCase(RedisFixture, TestCase):
         self.assertEqual(['specials'], list(storage.fetch_by_prefix('a?[]\\')))
 
     def test_missing_key_is_not_found_and_deletion_is_idempotent(self):
-        storage = RedisStorage(REDIS_CONNECTION)
+        storage = RedisStorage(REDIS_CLIENT)
 
         with self.assertRaises(ItemNotFound):
             storage.fetch_one('missing')
         storage.delete('missing')
 
     def test_storages_with_different_prefixes_do_not_mix(self):
-        first = RedisStorage(REDIS_CONNECTION, prefix='eric-redis-queues:test-1:')
-        second = RedisStorage(REDIS_CONNECTION, prefix='eric-redis-queues:test-2:')
+        first = RedisStorage(REDIS_CLIENT, prefix='eric-redis-queues:test-1:')
+        second = RedisStorage(REDIS_CLIENT, prefix='eric-redis-queues:test-2:')
         first.upsert('key', 'first')
 
         self.assertEqual(['first'], list(first.fetch_by_prefix('')))
         self.assertEqual([], list(second.fetch_by_prefix('')))
 
 
+class RedisQueueRepositoryTestCase(RedisFixture, TestCase):
+
+    def test_only_the_queue_id_is_stored_and_loaded_queues_get_the_repository_client(self):
+        storage = RedisStorage(REDIS_CLIENT)
+        repository = RedisQueueRepository(REDIS_CLIENT, storage)
+        queue = repository.create()
+        queue.push(Message(msg_type='test'))
+
+        repository.persist('connection', queue)
+
+        self.assertEqual({'queue_id': queue.queue_id}, storage.fetch_one('connection'))
+        self.assertEqual('test', repository.load('connection').pop().type)
+
+
 class RedisRepositoryTestCase(RedisFixture, TestCase):
 
     def test_messages_dispatched_after_persist_are_seen_by_another_repository(self):
         # As if producer and consumer were different processes: no persist is needed after dispatching
-        producer = redis_channel_repository_builder(SSEChannel, REDIS_CONNECTION).build()
-        consumer = redis_channel_repository_builder(SSEChannel, REDIS_CONNECTION).build()
+        producer = redis_channel_repository_builder(SSEChannel, REDIS_CLIENT).build()
+        consumer = redis_channel_repository_builder(SSEChannel, REDIS_CLIENT).build()
         channel = producer.create({})
         connection = channel.add_connection()
         producer.persist(channel)
@@ -84,7 +100,7 @@ class RedisRepositoryTestCase(RedisFixture, TestCase):
         self.assertEqual('hello', loaded.deliver_next(connection.id).payload)
 
     def test_deleting_a_channel_deletes_its_queued_messages(self):
-        repository = redis_channel_repository_builder(SSEChannel, REDIS_CONNECTION).build()
+        repository = redis_channel_repository_builder(SSEChannel, REDIS_CLIENT).build()
         channel = repository.create({})
         connection = channel.add_connection()
         channel.dispatch(connection.id, Message(msg_type='test'))
@@ -92,5 +108,5 @@ class RedisRepositoryTestCase(RedisFixture, TestCase):
 
         repository.delete(channel.id)
 
-        client = REDIS_CONNECTION.create_client()
+        client = REDIS_CLIENT
         self.assertEqual([], list(client.scan_iter(match='eric-redis-queues:*')))

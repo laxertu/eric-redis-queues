@@ -11,13 +11,16 @@ Changelog
   error handlers) before ``build()``
 * BREAKING: ``BlockingRedisQueue`` and ``RedisSSEChannelBlockingQueuesRepository`` removed, see
   `Blocking queues`_ below
+* BREAKING: ``RedisConnection`` removed: ``RedisStorage``, ``RedisQueue``, ``RedisQueueRepository`` and
+  ``redis_channel_repository_builder`` take a ``redis.Redis`` client, so connection details (credentials, TLS, pool,
+  timeouts) are up to the application. The client must not decode responses
 * BREAKING: keys layout changed: data persisted by 2.x is not readable by 3.x
 * ``RedisStorage`` implements eric-sse 3 ``KvStorage``: prefix searches match ``*``, ``?``, ``[``, ``]`` literally and
-  tolerate deletions while results are iterated. It can be pickled
+  tolerate deletions while results are iterated
 * ``RedisQueue`` implements eric-sse 3 ``Queue``: ``pop()`` returns immediately, ``pop(timeout)`` waits up to
-  **timeout** seconds with BLPOP, without polling. When pickled, only its identity (connection data and queue id) is
-  saved: messages stay in Redis
-* Added ``RedisQueueRepository``: deleting a connection deletes its queued messages too, instead of leaving them in Redis
+  **timeout** seconds with BLPOP, without polling
+* Added ``RedisQueueRepository``: it stores queue ids only, and gives loaded queues its client. Deleting a connection
+  deletes its queued messages too, instead of leaving them in Redis
 * Added integration tests running eric-sse contracts (channel repository, queue, channel, error handling) against a
   real Redis
 
@@ -72,4 +75,4 @@ Timeouts replace "forever": a consumer loop that waits again after each timeout 
 and still gets the chance to stop.
 
 Repositories created with ``RedisSSEChannelBlockingQueuesRepository`` are created with
-``redis_channel_repository_builder(SSEChannel, redis_connection).build()``.
+``redis_channel_repository_builder(SSEChannel, client).build()``.

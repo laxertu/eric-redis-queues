@@ -4,9 +4,12 @@ Redis support for eric-sse.
 * :class:`RedisStorage`: a :class:`~eric_sse.repository.KvStorage`, to persist channels, connections, listeners and queues;
 * :class:`RedisQueue`: a durable :class:`~eric_sse.queues.Queue`, whose messages live in a Redis list.
 
-Both take a ``redis.Redis`` client: connection details (host, credentials, TLS, pool, timeouts) are up to the
-application. See :func:`eric_redis_queues.repository.redis_channel_repository_builder` to wire them together.
+:class:`RedisQueue` is described by a :class:`RedisConnection` (host, port and database), so it can be pickled.
+:class:`RedisStorage` takes a ``redis.Redis`` client. See
+:func:`eric_redis_queues.repository.redis_channel_repository_builder` to wire them together.
 """
+import threading
+from dataclasses import dataclass
 from pickle import dumps, loads
 from typing import Any, Iterable
 
@@ -27,6 +30,31 @@ PREFIX_MESSAGES = f'{PREFIX}:m'
 """Key prefix of the lists holding :class:`RedisQueue` messages."""
 
 _GLOB_SPECIAL_CHARS = '\\*?[]'
+
+
+@dataclass(frozen=True)
+class RedisConnection:
+    """Where a :class:`RedisQueue` keeps its messages."""
+    host: str = '127.0.0.1'
+    port: int = 6379
+    db: int = 0
+
+    def create_client(self) -> Redis:
+        """Returns a new client. :class:`RedisQueue` instances share one client per connection instead."""
+        return Redis(host=self.host, port=self.port, db=self.db)
+
+
+_clients: dict[RedisConnection, Redis] = {}
+_clients_lock = threading.Lock()
+
+
+def _shared_client(redis_connection: RedisConnection) -> Redis:
+    """One client, so one connection pool, per connection data: queues are many, one per eric-sse connection."""
+    with _clients_lock:
+        client = _clients.get(redis_connection)
+        if client is None:
+            client = _clients[redis_connection] = redis_connection.create_client()
+        return client
 
 
 def _check_client(client: Redis) -> Redis:
@@ -93,8 +121,9 @@ class RedisQueue(Queue):
     """
     Durable queue: messages are pickled and kept in a Redis list, so several processes can share it.
 
-    It can't be pickled, as its client can't: persist it with
-    :class:`~eric_redis_queues.repository.RedisQueueRepository`, that stores its id and gives it a client when loading it.
+    When pickled, e.g. by :class:`~eric_redis_queues.repository.RedisQueueRepository`, only its identity (connection
+    data and queue id) is saved: its messages stay in Redis.
+    Queues with equal connection data share one client.
 
     :meth:`pop` without timeout returns immediately, as eric-sse requires. With a timeout it waits for a message,
     relying on `BLPOP <https://redis.io/docs/latest/commands/blpop/>`_, so it doesn't poll. This replaces
@@ -102,21 +131,28 @@ class RedisQueue(Queue):
     :meth:`~eric_sse.entities.AbstractChannel.wait_next` or ``queue.pop(timeout=...)``.
     :meth:`~eric_sse.queues.Queue.wait_pop` is inherited: it runs :meth:`pop` in a worker thread.
 
-    :param client: Must not decode responses (``decode_responses=False``, the default). A ``socket_timeout``, if set,
-        must be longer than the waits.
+    :param redis_connection: Defaults to a local Redis, database 0.
     :param queue_id: Identifies the Redis list. Defaults to a new uuid.
     """
 
-    def __init__(self, client: Redis, queue_id: str | None = None):
-        self.__client = _check_client(client)
+    def __init__(self, redis_connection: RedisConnection | None = None, queue_id: str | None = None):
+        self.__redis_connection = redis_connection if redis_connection is not None else RedisConnection()
         self.__queue_id = queue_id if queue_id is not None else generate_uuid()
+        self.__client = _shared_client(self.__redis_connection)
 
-    def __getstate__(self):
-        raise TypeError('RedisQueue can\'t be pickled: persist it with RedisQueueRepository, that stores its id')
+    def __getstate__(self) -> dict:
+        return {'redis_connection': self.__redis_connection, 'queue_id': self.__queue_id}
+
+    def __setstate__(self, state: dict) -> None:
+        self.__init__(**state)
 
     @property
     def queue_id(self) -> str:
         return self.__queue_id
+
+    @property
+    def redis_connection(self) -> RedisConnection:
+        return self.__redis_connection
 
     @property
     def _key(self) -> str:

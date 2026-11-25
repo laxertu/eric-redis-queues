@@ -1,16 +1,10 @@
 # TODO
 
-## Pub/Sub wake-ups (branch `pubsub-wakeups`)
+## Connections per waiting stream
 
-Implemented, not committed yet. Before merging, decide on:
-
-- **Fan-out:** every process using the same Redis and database receives every push notification (a queue id), also
-  for queues it is not waiting on. Traffic grows with pushes × processes. Alternative: subscribe per queue while it
-  has waiters, at the cost of a subscribe round trip per wait.
-- **Mixed versions:** consumers on the old BLPOP code still receive messages from new producers, but new consumers
-  aren't woken by old producers (no notification): they find those messages only when their wait times out.
-- **Shared Redis in tests:** `test_waits_recover_when_the_notifications_connection_is_lost` kills every connection
-  named `eric-redis-queues:notifier` on the server, including other processes' (they reconnect by themselves).
+Each waiting `wait_pop()` holds a Redis connection (BLPOP). If that becomes a limit (`maxclients`, 10000 by default),
+consider Pub/Sub wake-ups (one connection per process, tried on branch history of #12). Measure first with the
+planned eric-api Locust scenarios.
 
 ## Release 3.0.0
 

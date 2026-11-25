@@ -302,10 +302,7 @@ document.write(`
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eric_redis_queues">Reference</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.PREFIX_STORAGE"><code class="docutils literal notranslate"><span class="pre">PREFIX_STORAGE</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.PREFIX_MESSAGES"><code class="docutils literal notranslate"><span class="pre">PREFIX_MESSAGES</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.PREFIX_WAKE"><code class="docutils literal notranslate"><span class="pre">PREFIX_WAKE</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.NOTIFIER_CLIENT_NAME"><code class="docutils literal notranslate"><span class="pre">NOTIFIER_CLIENT_NAME</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisConnection"><code class="docutils literal notranslate"><span class="pre">RedisConnection</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisConnection.create_client"><code class="docutils literal notranslate"><span class="pre">create_client()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisConnection.__init__"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
 </ul>
 </li>
@@ -355,14 +352,8 @@ document.write(`
 </section>
 <section id="module-eric_redis_queues">
 <span id="reference"></span><h1>Reference<a class="headerlink" href="#module-eric_redis_queues" title="Link to this heading">#</a></h1>
-<p>Redis support for eric-sse.</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="#eric_redis_queues.RedisStorage" title="eric_redis_queues.RedisStorage"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisStorage</span></code></a>: a <a class="reference external" href="https://laxertu.github.io/eric/reference/persistence.html#eric_sse.repository.KvStorage" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">KvStorage</span></code></a>, to persist channels, connections, listeners and queues;</p></li>
-<li><p><a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a>: a durable <a class="reference external" href="https://laxertu.github.io/eric/reference/entities.html#eric_sse.queues.Queue" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Queue</span></code></a>, whose messages live in a Redis list.</p></li>
-</ul>
-<p><a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a> is described by a <a class="reference internal" href="#eric_redis_queues.RedisConnection" title="eric_redis_queues.RedisConnection"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisConnection</span></code></a> (host, port and database), so it can be pickled.
-<a class="reference internal" href="#eric_redis_queues.RedisStorage" title="eric_redis_queues.RedisStorage"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisStorage</span></code></a> takes a <code class="docutils literal notranslate"><span class="pre">redis.Redis</span></code> client. See
-<a class="reference internal" href="#eric_redis_queues.repository.redis_channel_repository_builder" title="eric_redis_queues.repository.redis_channel_repository_builder"><code class="xref py py-func docutils literal notranslate"><span class="pre">eric_redis_queues.repository.redis_channel_repository_builder()</span></code></a> to wire them together.</p>
+<p>Redis support for eric-sse: <a class="reference internal" href="#eric_redis_queues.RedisStorage" title="eric_redis_queues.RedisStorage"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisStorage</span></code></a> persists channels, connections, listeners and queues,
+<a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a> keeps messages. See <a class="reference internal" href="#eric_redis_queues.repository.redis_channel_repository_builder" title="eric_redis_queues.repository.redis_channel_repository_builder"><code class="xref py py-func docutils literal notranslate"><span class="pre">eric_redis_queues.repository.redis_channel_repository_builder()</span></code></a>.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="eric_redis_queues.PREFIX_STORAGE">
 <span class="sig-name descname"><span class="pre">PREFIX_STORAGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'eric-redis-queues:kv:'</span></em><a class="headerlink" href="#eric_redis_queues.PREFIX_STORAGE" title="Link to this definition">#</a></dt>
@@ -372,37 +363,14 @@ document.write(`
 <dl class="py data">
 <dt class="sig sig-object py" id="eric_redis_queues.PREFIX_MESSAGES">
 <span class="sig-name descname"><span class="pre">PREFIX_MESSAGES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'eric-redis-queues:m'</span></em><a class="headerlink" href="#eric_redis_queues.PREFIX_MESSAGES" title="Link to this definition">#</a></dt>
-<dd><p>Key prefix of the lists holding <a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a> messages.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="eric_redis_queues.PREFIX_WAKE">
-<span class="sig-name descname"><span class="pre">PREFIX_WAKE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'eric-redis-queues:wake'</span></em><a class="headerlink" href="#eric_redis_queues.PREFIX_WAKE" title="Link to this definition">#</a></dt>
-<dd><p>Prefix of the Pub/Sub channels notifying pushes to <a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a> instances, one per database.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="eric_redis_queues.NOTIFIER_CLIENT_NAME">
-<span class="sig-name descname"><span class="pre">NOTIFIER_CLIENT_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'eric-redis-queues:notifier'</span></em><a class="headerlink" href="#eric_redis_queues.NOTIFIER_CLIENT_NAME" title="Link to this definition">#</a></dt>
-<dd><p>Name of the Redis connections receiving push notifications, one per process and <a class="reference internal" href="#eric_redis_queues.RedisConnection" title="eric_redis_queues.RedisConnection"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisConnection</span></code></a>.</p>
+<dd><p>Key prefix of <a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a> message lists.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="eric_redis_queues.RedisConnection">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RedisConnection</span></span><a class="headerlink" href="#eric_redis_queues.RedisConnection" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Where a <a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a> keeps its messages.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="eric_redis_queues.RedisConnection.create_client">
-<span class="sig-name descname"><span class="pre">create_client</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.RedisConnection.create_client" title="Link to this definition">#</a></dt>
-<dd><p>Returns a new client. <a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a> instances share one client per connection instead.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>Redis</em></p>
-</dd>
-</dl>
-</dd></dl>
-
+<p>RedisConnection(host: str = ‘127.0.0.1’, port: int = 6379, db: int = 0)</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="eric_redis_queues.RedisConnection.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6379</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.RedisConnection.__init__" title="Link to this definition">#</a></dt>
@@ -430,9 +398,8 @@ document.write(`
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>client</strong> – Must not decode responses (<code class="docutils literal notranslate"><span class="pre">decode_responses=False</span></code>, the default).</p></li>
-<li><p><strong>prefix</strong> – Prepended to every key. Storages sharing a Redis database must have prefixes that are not
-prefixes of each other.</p></li>
+<li><p><strong>client</strong> – Must not decode responses.</p></li>
+<li><p><strong>prefix</strong> – Prepended to every key. Prefixes of storages sharing a database must not be prefixes of each other.</p></li>
 </ul>
 </dd>
 </dl>
@@ -509,22 +476,16 @@ prefixes of each other.</p></li>
 <dt class="sig sig-object py" id="eric_redis_queues.RedisQueue">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RedisQueue</span></span><a class="headerlink" href="#eric_redis_queues.RedisQueue" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://laxertu.github.io/eric/reference/entities.html#eric_sse.queues.Queue" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Queue</span></code></a></p>
-<p>Durable queue: messages are pickled and kept in a Redis list, so several processes can share it.</p>
-<p>When pickled, e.g. by <a class="reference internal" href="#eric_redis_queues.repository.RedisQueueRepository" title="eric_redis_queues.repository.RedisQueueRepository"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueueRepository</span></code></a>, only its identity (connection
-data and queue id) is saved: its messages stay in Redis.
-Queues with equal connection data share one client.</p>
-<p><a class="reference internal" href="#eric_redis_queues.RedisQueue.pop" title="eric_redis_queues.RedisQueue.pop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pop()</span></code></a> without timeout returns immediately, as eric-sse requires. With a timeout it waits for a message:
-this replaces <code class="docutils literal notranslate"><span class="pre">BlockingRedisQueue</span></code> of previous versions, callers choose whether to wait, e.g. with
-<a class="reference external" href="https://laxertu.github.io/eric/reference/entities.html#eric_sse.entities.AbstractChannel.wait_next" title="(in eric-sse)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait_next()</span></code></a> or <code class="docutils literal notranslate"><span class="pre">queue.pop(timeout=...)</span></code>.</p>
-<p>Waits don’t poll and don’t hold a Redis connection: <code class="xref py py-meth docutils literal notranslate"><span class="pre">push()</span></code> publishes a notification on a Pub/Sub channel,
-that one connection per process receives to wake the waiters of the queue. <a class="reference internal" href="#eric_redis_queues.RedisQueue.wait_pop" title="eric_redis_queues.RedisQueue.wait_pop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait_pop()</span></code></a> waits natively,
-without a thread. A waiter checks the queue once more when its timeout expires, so a lost notification can delay
-a message, never lose it.</p>
+<p>Durable queue keeping pickled messages in a Redis list. Pickling it saves only its connection data and id.</p>
+<p><a class="reference internal" href="#eric_redis_queues.RedisQueue.pop" title="eric_redis_queues.RedisQueue.pop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pop()</span></code></a> without timeout returns immediately, with a timeout it waits with
+<a class="reference external" href="https://redis.io/docs/latest/commands/blpop/">BLPOP</a>. <a class="reference internal" href="#eric_redis_queues.RedisQueue.wait_pop" title="eric_redis_queues.RedisQueue.wait_pop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait_pop()</span></code></a> runs BLPOP on an async client, so it
+holds no thread, but holds a Redis connection while waiting. Queues with equal connection data share one client
+per event loop.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>redis_connection</strong> – Defaults to a local Redis, database 0.</p></li>
-<li><p><strong>queue_id</strong> – Identifies the Redis list. Defaults to a new uuid.</p></li>
+<li><p><strong>queue_id</strong> – Defaults to a new uuid.</p></li>
 </ul>
 </dd>
 </dl>
@@ -698,10 +659,7 @@ database 0.</p></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eric_redis_queues">Reference</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.PREFIX_STORAGE"><code class="docutils literal notranslate"><span class="pre">PREFIX_STORAGE</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.PREFIX_MESSAGES"><code class="docutils literal notranslate"><span class="pre">PREFIX_MESSAGES</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.PREFIX_WAKE"><code class="docutils literal notranslate"><span class="pre">PREFIX_WAKE</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.NOTIFIER_CLIENT_NAME"><code class="docutils literal notranslate"><span class="pre">NOTIFIER_CLIENT_NAME</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisConnection"><code class="docutils literal notranslate"><span class="pre">RedisConnection</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisConnection.create_client"><code class="docutils literal notranslate"><span class="pre">create_client()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisConnection.__init__"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
 </ul>
 </li>

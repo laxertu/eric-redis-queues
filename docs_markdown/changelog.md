@@ -18,12 +18,9 @@
 * `RedisQueue` implements eric-sse 3 `Queue`: `pop()` returns immediately, `pop(timeout)` and `wait_pop()`
   wait up to **timeout** seconds. When pickled, only its identity (connection data and queue id) is saved: messages
   stay in Redis. Queues with equal connection data share one client, so one connection pool
-* Waits don’t poll and don’t hold a Redis connection: `push()` publishes a notification on a Pub/Sub channel
-  (`eric-redis-queues:wake:<db>`, in the same transaction as the message), and one connection per process
-  (named `eric-redis-queues:notifier`) wakes the waiters of the queue. `wait_pop()` waits natively, without a
-  thread, so any number of streams can wait at once. A wait checks its queue once more when it times out, and all
-  waits check again after the notifications connection is restored: a lost notification delays a message, never loses
-  it. A message popped by a cancelled `wait_pop()` is put back at the head of its queue
+* `wait_pop()` runs BLPOP on an async client, without a thread: any number of streams can wait at once, each
+  holding a Redis connection while waiting. A message popped by a cancelled `wait_pop()` is put back at the head of
+  its queue
 * Added `RedisQueueRepository`: deleting a connection deletes its queued messages too, instead of leaving them in
   Redis
 * Added integration tests running eric-sse contracts (channel repository, queue, channel, error handling) against a
@@ -43,8 +40,8 @@ it, so a queue waiting forever on `pop()`:
 * breaks `DataProcessingChannel.process_queue()`, that pops until the queue is empty: after the last message it
   blocks the event loop forever, and messages already popped are never yielded.
 
-**Same behaviour in 3.0.0.** Use `RedisQueue`, and wait where you consume. Waits are woken by Pub/Sub
-notifications, so they don’t poll, and a message pushed while waiting is returned at once.
+**Same behaviour in 3.0.0.** Use `RedisQueue`, and wait where you consume. Waits rely on BLPOP, so they
+don’t poll, and a message pushed while waiting is returned at once.
 
 In async code, wait for the next message without blocking the event loop:
 

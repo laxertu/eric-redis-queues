@@ -8,14 +8,8 @@ A Redis implementation of persistence layer of eric-sse:
 
 # Reference
 
-Redis support for eric-sse.
-
-* [`RedisStorage`](#eric_redis_queues.RedisStorage): a [`KvStorage`](https://laxertu.github.io/eric/reference/persistence.html#eric_sse.repository.KvStorage), to persist channels, connections, listeners and queues;
-* [`RedisQueue`](#eric_redis_queues.RedisQueue): a durable [`Queue`](https://laxertu.github.io/eric/reference/entities.html#eric_sse.queues.Queue), whose messages live in a Redis list.
-
-[`RedisQueue`](#eric_redis_queues.RedisQueue) is described by a [`RedisConnection`](#eric_redis_queues.RedisConnection) (host, port and database), so it can be pickled.
-[`RedisStorage`](#eric_redis_queues.RedisStorage) takes a `redis.Redis` client. See
-[`eric_redis_queues.repository.redis_channel_repository_builder()`](#eric_redis_queues.repository.redis_channel_repository_builder) to wire them together.
+Redis support for eric-sse: [`RedisStorage`](#eric_redis_queues.RedisStorage) persists channels, connections, listeners and queues,
+[`RedisQueue`](#eric_redis_queues.RedisQueue) keeps messages. See [`eric_redis_queues.repository.redis_channel_repository_builder()`](#eric_redis_queues.repository.redis_channel_repository_builder).
 
 ### PREFIX_STORAGE *= 'eric-redis-queues:kv:'*
 
@@ -23,20 +17,13 @@ Default key prefix of [`RedisStorage`](#eric_redis_queues.RedisStorage).
 
 ### PREFIX_MESSAGES *= 'eric-redis-queues:m'*
 
-Key prefix of the lists holding [`RedisQueue`](#eric_redis_queues.RedisQueue) messages.
+Key prefix of [`RedisQueue`](#eric_redis_queues.RedisQueue) message lists.
 
 ### *class* RedisConnection
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
-Where a [`RedisQueue`](#eric_redis_queues.RedisQueue) keeps its messages.
-
-#### create_client()
-
-Returns a new client. [`RedisQueue`](#eric_redis_queues.RedisQueue) instances share one client per connection instead.
-
-* **Return type:**
-  *Redis*
+RedisConnection(host: str = ‘127.0.0.1’, port: int = 6379, db: int = 0)
 
 #### \_\_init_\_(host='127.0.0.1', port=6379, db=0)
 
@@ -54,14 +41,13 @@ Bases: [`KvStorage`](https://laxertu.github.io/eric/reference/persistence.html#e
 [`KvStorage`](https://laxertu.github.io/eric/reference/persistence.html#eric_sse.repository.KvStorage) backed by Redis. Values are pickled.
 
 * **Parameters:**
-  * **client** – Must not decode responses (`decode_responses=False`, the default).
-  * **prefix** – Prepended to every key. Storages sharing a Redis database must have prefixes that are not
-    prefixes of each other.
+  * **redis_connection** – Defaults to a local Redis, database 0. Shares the client of queues with equal connection data.
+  * **prefix** – Prepended to every key. Prefixes of storages sharing a database must not be prefixes of each other.
 
-#### \_\_init_\_(client, prefix='eric-redis-queues:kv:')
+#### \_\_init_\_(redis_connection=None, prefix='eric-redis-queues:kv:')
 
 * **Parameters:**
-  * **client** (*Redis*)
+  * **redis_connection** ([*RedisConnection*](#eric_redis_queues.RedisConnection) *|* *None*)
   * **prefix** ([*str*](https://docs.python.org/3/builtins/stdtypes.html#str))
 
 #### fetch_by_prefix(prefix)
@@ -103,21 +89,16 @@ Idempotent deletion. Do not throw an error on invalid key
 
 Bases: [`Queue`](https://laxertu.github.io/eric/reference/entities.html#eric_sse.queues.Queue)
 
-Durable queue: messages are pickled and kept in a Redis list, so several processes can share it.
+Durable queue keeping pickled messages in a Redis list. Pickling it saves only its connection data and id.
 
-When pickled, e.g. by [`RedisQueueRepository`](#eric_redis_queues.repository.RedisQueueRepository), only its identity (connection
-data and queue id) is saved: its messages stay in Redis.
-Queues with equal connection data share one client.
-
-[`pop()`](#eric_redis_queues.RedisQueue.pop) without timeout returns immediately, as eric-sse requires. With a timeout it waits for a message,
-relying on [BLPOP](https://redis.io/docs/latest/commands/blpop/), so it doesn’t poll. This replaces
-`BlockingRedisQueue` of previous versions: callers choose whether to wait, e.g. with
-[`wait_next()`](https://laxertu.github.io/eric/reference/entities.html#eric_sse.entities.AbstractChannel.wait_next) or `queue.pop(timeout=...)`.
-[`wait_pop()`](https://laxertu.github.io/eric/reference/entities.html#eric_sse.queues.Queue.wait_pop) is inherited: it runs [`pop()`](#eric_redis_queues.RedisQueue.pop) in a worker thread.
+[`pop()`](#eric_redis_queues.RedisQueue.pop) without timeout returns immediately, with a timeout it waits with
+[BLPOP](https://redis.io/docs/latest/commands/blpop/). [`wait_pop()`](#eric_redis_queues.RedisQueue.wait_pop) runs BLPOP on an async client, so it
+holds no thread, but holds a Redis connection while waiting. Queues with equal connection data share one client
+per event loop.
 
 * **Parameters:**
   * **redis_connection** – Defaults to a local Redis, database 0.
-  * **queue_id** – Identifies the Redis list. Defaults to a new uuid.
+  * **queue_id** – Defaults to a new uuid.
 
 #### \_\_init_\_(redis_connection=None, queue_id=None)
 
@@ -136,6 +117,20 @@ Next message from the queue.
 
 Raises a [`NoMessagesException`](https://laxertu.github.io/eric/reference/exceptions.html#eric_sse.exception.NoMessagesException) if no message is available, after waiting
 **timeout** seconds.
+
+#### *async* wait_pop(timeout)
+
+Waits for the next message without blocking the event loop.
+
+The default implementation runs [`pop()`](#eric_redis_queues.RedisQueue.pop) with **timeout** in a worker thread, so it takes one thread
+per waiting call. Override it with a native async wait when possible.
+
+* **Parameters:**
+  **timeout** ([*float*](https://docs.python.org/3/builtins/functions.html#float)) – Seconds to wait for a message.
+* **Return type:**
+  [*Any*](https://docs.python.org/3/library/typing.html#typing.Any)
+
+Raises a [`NoMessagesException`](https://laxertu.github.io/eric/reference/exceptions.html#eric_sse.exception.NoMessagesException) if no message arrives within **timeout**.
 
 #### purge()
 

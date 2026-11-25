@@ -9,15 +9,17 @@
   error handlers) before `build()`
 * BREAKING: `BlockingRedisQueue` and `RedisSSEChannelBlockingQueuesRepository` removed, see
   [Blocking queues]() below
-* BREAKING: `RedisStorage` takes a `redis.Redis` client, so its connection details (credentials, TLS, pool,
-  timeouts) are up to the application. The client must not decode responses. `RedisQueue`,
-  `RedisQueueRepository` and `redis_channel_repository_builder` take a `RedisConnection` (host, port, db)
+* BREAKING: `RedisStorage(redis_connection, prefix)`: arguments swapped, and `prefix` has a default. Storages and
+  queues with equal connection data share one client, so one connection pool
 * BREAKING: keys layout changed: data persisted by 2.x is not readable by 3.x
 * `RedisStorage` implements eric-sse 3 `KvStorage`: prefix searches match `*`, `?`, `[`, `]` literally and
   tolerate deletions while results are iterated
-* `RedisQueue` implements eric-sse 3 `Queue`: `pop()` returns immediately, `pop(timeout)` waits up to
-  **timeout** seconds with BLPOP, without polling. When pickled, only its identity (connection data and queue id) is
-  saved: messages stay in Redis. Queues with equal connection data share one client, so one connection pool
+* `RedisQueue` implements eric-sse 3 `Queue`: `pop()` returns immediately, `pop(timeout)` and `wait_pop()`
+  wait up to **timeout** seconds. When pickled, only its identity (connection data and queue id) is saved: messages
+  stay in Redis. Queues with equal connection data share one client, so one connection pool
+* `wait_pop()` runs BLPOP on an async client, without a thread: any number of streams can wait at once, each
+  holding a Redis connection while waiting. A message popped by a cancelled `wait_pop()` is put back at the head of
+  its queue
 * Added `RedisQueueRepository`: deleting a connection deletes its queued messages too, instead of leaving them in
   Redis
 * Added integration tests running eric-sse contracts (channel repository, queue, channel, error handling) against a
@@ -37,8 +39,8 @@ it, so a queue waiting forever on `pop()`:
 * breaks `DataProcessingChannel.process_queue()`, that pops until the queue is empty: after the last message it
   blocks the event loop forever, and messages already popped are never yielded.
 
-**Same behaviour in 3.0.0.** Use `RedisQueue`, and wait where you consume. Waits rely on BLPOP, so they don’t poll,
-and a message pushed while waiting is returned at once.
+**Same behaviour in 3.0.0.** Use `RedisQueue`, and wait where you consume. Waits rely on BLPOP, so they
+don’t poll, and a message pushed while waiting is returned at once.
 
 In async code, wait for the next message without blocking the event loop:
 

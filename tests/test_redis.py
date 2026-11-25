@@ -5,7 +5,6 @@ from unittest import TestCase
 from eric_sse.exception import ItemNotFound, NoMessagesException
 from eric_sse.message import Message
 from eric_sse.prefabs import SSEChannel
-from redis import Redis
 
 from eric_redis_queues import RedisQueue, RedisStorage
 from eric_redis_queues.repository import RedisQueueRepository, redis_channel_repository_builder
@@ -48,12 +47,8 @@ class RedisQueueTestCase(RedisFixture, TestCase):
 
 class RedisStorageTestCase(RedisFixture, TestCase):
 
-    def test_clients_decoding_responses_are_rejected(self):
-        with self.assertRaises(ValueError):
-            RedisStorage(Redis(decode_responses=True))  # Never connects: the check is on its configuration
-
     def test_prefix_glob_characters_are_matched_literally(self):
-        storage = RedisStorage(REDIS_CLIENT)
+        storage = RedisStorage(REDIS_CONNECTION)
         storage.upsert('a*:1', 'star')
         storage.upsert('ab:1', 'other')
         storage.upsert('a?[]\\:1', 'specials')
@@ -62,15 +57,15 @@ class RedisStorageTestCase(RedisFixture, TestCase):
         self.assertEqual(['specials'], list(storage.fetch_by_prefix('a?[]\\')))
 
     def test_missing_key_is_not_found_and_deletion_is_idempotent(self):
-        storage = RedisStorage(REDIS_CLIENT)
+        storage = RedisStorage(REDIS_CONNECTION)
 
         with self.assertRaises(ItemNotFound):
             storage.fetch_one('missing')
         storage.delete('missing')
 
     def test_storages_with_different_prefixes_do_not_mix(self):
-        first = RedisStorage(REDIS_CLIENT, prefix='eric-redis-queues:test-1:')
-        second = RedisStorage(REDIS_CLIENT, prefix='eric-redis-queues:test-2:')
+        first = RedisStorage(REDIS_CONNECTION, prefix='eric-redis-queues:test-1:')
+        second = RedisStorage(REDIS_CONNECTION, prefix='eric-redis-queues:test-2:')
         first.upsert('key', 'first')
 
         self.assertEqual(['first'], list(first.fetch_by_prefix('')))
@@ -80,7 +75,7 @@ class RedisStorageTestCase(RedisFixture, TestCase):
 class RedisQueueRepositoryTestCase(RedisFixture, TestCase):
 
     def test_loaded_queues_keep_their_identity_and_messages(self):
-        repository = RedisQueueRepository(REDIS_CONNECTION, RedisStorage(REDIS_CLIENT))
+        repository = RedisQueueRepository(REDIS_CONNECTION, RedisStorage(REDIS_CONNECTION))
         queue = repository.create()
         queue.push(Message(msg_type='test'))
 

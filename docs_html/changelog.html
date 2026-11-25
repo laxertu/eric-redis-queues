@@ -323,15 +323,17 @@ wires everything to Redis through eric-sse’s <code class="docutils literal not
 error handlers) before <code class="docutils literal notranslate"><span class="pre">build()</span></code></p></li>
 <li><p>BREAKING: <code class="docutils literal notranslate"><span class="pre">BlockingRedisQueue</span></code> and <code class="docutils literal notranslate"><span class="pre">RedisSSEChannelBlockingQueuesRepository</span></code> removed, see
 <a class="reference internal" href="#blocking-queues">Blocking queues</a> below</p></li>
-<li><p>BREAKING: <code class="docutils literal notranslate"><span class="pre">RedisStorage</span></code> takes a <code class="docutils literal notranslate"><span class="pre">redis.Redis</span></code> client, so its connection details (credentials, TLS, pool,
-timeouts) are up to the application. The client must not decode responses. <code class="docutils literal notranslate"><span class="pre">RedisQueue</span></code>,
-<code class="docutils literal notranslate"><span class="pre">RedisQueueRepository</span></code> and <code class="docutils literal notranslate"><span class="pre">redis_channel_repository_builder</span></code> take a <code class="docutils literal notranslate"><span class="pre">RedisConnection</span></code> (host, port, db)</p></li>
+<li><p>BREAKING: <code class="docutils literal notranslate"><span class="pre">RedisStorage(redis_connection,</span> <span class="pre">prefix)</span></code>: arguments swapped, and <code class="docutils literal notranslate"><span class="pre">prefix</span></code> has a default. Storages and
+queues with equal connection data share one client, so one connection pool</p></li>
 <li><p>BREAKING: keys layout changed: data persisted by 2.x is not readable by 3.x</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">RedisStorage</span></code> implements eric-sse 3 <code class="docutils literal notranslate"><span class="pre">KvStorage</span></code>: prefix searches match <code class="docutils literal notranslate"><span class="pre">*</span></code>, <code class="docutils literal notranslate"><span class="pre">?</span></code>, <code class="docutils literal notranslate"><span class="pre">[</span></code>, <code class="docutils literal notranslate"><span class="pre">]</span></code> literally and
 tolerate deletions while results are iterated</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">RedisQueue</span></code> implements eric-sse 3 <code class="docutils literal notranslate"><span class="pre">Queue</span></code>: <code class="docutils literal notranslate"><span class="pre">pop()</span></code> returns immediately, <code class="docutils literal notranslate"><span class="pre">pop(timeout)</span></code> waits up to
-<strong>timeout</strong> seconds with BLPOP, without polling. When pickled, only its identity (connection data and queue id) is
-saved: messages stay in Redis. Queues with equal connection data share one client, so one connection pool</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RedisQueue</span></code> implements eric-sse 3 <code class="docutils literal notranslate"><span class="pre">Queue</span></code>: <code class="docutils literal notranslate"><span class="pre">pop()</span></code> returns immediately, <code class="docutils literal notranslate"><span class="pre">pop(timeout)</span></code> and <code class="docutils literal notranslate"><span class="pre">wait_pop()</span></code>
+wait up to <strong>timeout</strong> seconds. When pickled, only its identity (connection data and queue id) is saved: messages
+stay in Redis. Queues with equal connection data share one client, so one connection pool</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wait_pop()</span></code> runs BLPOP on an async client, without a thread: any number of streams can wait at once, each
+holding a Redis connection while waiting. A message popped by a cancelled <code class="docutils literal notranslate"><span class="pre">wait_pop()</span></code> is put back at the head of
+its queue</p></li>
 <li><p>Added <code class="docutils literal notranslate"><span class="pre">RedisQueueRepository</span></code>: deleting a connection deletes its queued messages too, instead of leaving them in
 Redis</p></li>
 <li><p>Added integration tests running eric-sse contracts (channel repository, queue, channel, error handling) against a
@@ -350,8 +352,8 @@ event loop;</p></li>
 <li><p>breaks <code class="docutils literal notranslate"><span class="pre">DataProcessingChannel.process_queue()</span></code>, that pops until the queue is empty: after the last message it
 blocks the event loop forever, and messages already popped are never yielded.</p></li>
 </ul>
-<p><strong>Same behaviour in 3.0.0.</strong> Use <code class="docutils literal notranslate"><span class="pre">RedisQueue</span></code>, and wait where you consume. Waits rely on BLPOP, so they don’t poll,
-and a message pushed while waiting is returned at once.</p>
+<p><strong>Same behaviour in 3.0.0.</strong> Use <code class="docutils literal notranslate"><span class="pre">RedisQueue</span></code>, and wait where you consume. Waits rely on BLPOP, so they
+don’t poll, and a message pushed while waiting is returned at once.</p>
 <p>In async code, wait for the next message without blocking the event loop:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">connection</span><span class="o">.</span><span class="n">listener</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>

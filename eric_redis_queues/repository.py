@@ -49,8 +49,7 @@ def redis_channel_repository_builder(
     :param prefix: Key prefix of the storage, see :class:`~eric_redis_queues.RedisStorage`.
     """
     redis_connection = redis_connection if redis_connection is not None else RedisConnection()
-    client = redis_connection.create_client()
-    storage = RedisStorage(client) if prefix is None else RedisStorage(client, prefix=prefix)
+    storage = RedisStorage(redis_connection) if prefix is None else RedisStorage(redis_connection, prefix=prefix)
     return (
         ChannelRepositoryBuilder(channel_class, storage)
         .queues_repository(RedisQueueRepository(redis_connection, PrefixedStorage(storage, 'queue:')))

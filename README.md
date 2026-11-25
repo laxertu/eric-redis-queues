@@ -27,8 +27,7 @@ handlers) before `build()`.
 * `BlockingRedisQueue` and `RedisSSEChannelBlockingQueuesRepository` are removed: in eric-sse 3 waiting is up to the
   caller, e.g. `await channel.wait_next(connection_id, timeout)`. See the
   [changelog](docs/source/changelog.rst#blocking-queues) for why, and how to get the same behaviour.
-* `RedisStorage` takes a `redis.Redis` client instead of a `RedisConnection` and a prefix. `RedisQueue` and
-  `redis_channel_repository_builder` still take a `RedisConnection`.
+* `RedisStorage(redis_connection, prefix)`: arguments swapped, and `prefix` has a default.
 * Keys layout changed: data persisted by 2.x is not readable by 3.x.
 
 *Tests*

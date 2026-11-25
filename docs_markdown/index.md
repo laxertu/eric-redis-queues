@@ -25,6 +25,14 @@ Default key prefix of [`RedisStorage`](#eric_redis_queues.RedisStorage).
 
 Key prefix of the lists holding [`RedisQueue`](#eric_redis_queues.RedisQueue) messages.
 
+### PREFIX_WAKE *= 'eric-redis-queues:wake'*
+
+Prefix of the Pub/Sub channels notifying pushes to [`RedisQueue`](#eric_redis_queues.RedisQueue) instances, one per database.
+
+### NOTIFIER_CLIENT_NAME *= 'eric-redis-queues:notifier'*
+
+Name of the Redis connections receiving push notifications, one per process and [`RedisConnection`](#eric_redis_queues.RedisConnection).
+
 ### *class* RedisConnection
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
@@ -109,11 +117,14 @@ When pickled, e.g. by [`RedisQueueRepository`](#eric_redis_queues.repository.Red
 data and queue id) is saved: its messages stay in Redis.
 Queues with equal connection data share one client.
 
-[`pop()`](#eric_redis_queues.RedisQueue.pop) without timeout returns immediately, as eric-sse requires. With a timeout it waits for a message,
-relying on [BLPOP](https://redis.io/docs/latest/commands/blpop/), so it doesn’t poll. This replaces
-`BlockingRedisQueue` of previous versions: callers choose whether to wait, e.g. with
+[`pop()`](#eric_redis_queues.RedisQueue.pop) without timeout returns immediately, as eric-sse requires. With a timeout it waits for a message:
+this replaces `BlockingRedisQueue` of previous versions, callers choose whether to wait, e.g. with
 [`wait_next()`](https://laxertu.github.io/eric/reference/entities.html#eric_sse.entities.AbstractChannel.wait_next) or `queue.pop(timeout=...)`.
-[`wait_pop()`](https://laxertu.github.io/eric/reference/entities.html#eric_sse.queues.Queue.wait_pop) is inherited: it runs [`pop()`](#eric_redis_queues.RedisQueue.pop) in a worker thread.
+
+Waits don’t poll and don’t hold a Redis connection: `push()` publishes a notification on a Pub/Sub channel,
+that one connection per process receives to wake the waiters of the queue. [`wait_pop()`](#eric_redis_queues.RedisQueue.wait_pop) waits natively,
+without a thread. A waiter checks the queue once more when its timeout expires, so a lost notification can delay
+a message, never lose it.
 
 * **Parameters:**
   * **redis_connection** – Defaults to a local Redis, database 0.
@@ -136,6 +147,20 @@ Next message from the queue.
 
 Raises a [`NoMessagesException`](https://laxertu.github.io/eric/reference/exceptions.html#eric_sse.exception.NoMessagesException) if no message is available, after waiting
 **timeout** seconds.
+
+#### *async* wait_pop(timeout)
+
+Waits for the next message without blocking the event loop.
+
+The default implementation runs [`pop()`](#eric_redis_queues.RedisQueue.pop) with **timeout** in a worker thread, so it takes one thread
+per waiting call. Override it with a native async wait when possible.
+
+* **Parameters:**
+  **timeout** ([*float*](https://docs.python.org/3/builtins/functions.html#float)) – Seconds to wait for a message.
+* **Return type:**
+  [*Any*](https://docs.python.org/3/library/typing.html#typing.Any)
+
+Raises a [`NoMessagesException`](https://laxertu.github.io/eric/reference/exceptions.html#eric_sse.exception.NoMessagesException) if no message arrives within **timeout**.
 
 #### purge()
 

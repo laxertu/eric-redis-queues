@@ -8,10 +8,13 @@ Redis support for eric-sse.
 :class:`RedisStorage` takes a ``redis.Redis`` client. See
 :func:`eric_redis_queues.repository.redis_channel_repository_builder` to wire them together.
 """
+import asyncio
+import os
 import threading
+import time
 from dataclasses import dataclass
 from pickle import dumps, loads
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 from redis import Redis
 
@@ -28,6 +31,10 @@ PREFIX_STORAGE = f'{PREFIX}:kv:'
 """Default key prefix of :class:`RedisStorage`."""
 PREFIX_MESSAGES = f'{PREFIX}:m'
 """Key prefix of the lists holding :class:`RedisQueue` messages."""
+PREFIX_WAKE = f'{PREFIX}:wake'
+"""Prefix of the Pub/Sub channels notifying pushes to :class:`RedisQueue` instances, one per database."""
+NOTIFIER_CLIENT_NAME = f'{PREFIX}:notifier'
+"""Name of the Redis connections receiving push notifications, one per process and :class:`RedisConnection`."""
 
 _GLOB_SPECIAL_CHARS = '\\*?[]'
 
@@ -117,6 +124,97 @@ class RedisStorage(KvStorage):
             raise RepositoryError(e) from None
 
 
+def _wake_channel(redis_connection: RedisConnection) -> str:
+    # Pub/Sub channels are shared by all databases of a server, so the database is part of the name
+    return f'{PREFIX_WAKE}:{redis_connection.db}'
+
+
+class _Notifier:
+    """
+    Receives push notifications of a :class:`RedisConnection` and wakes the local waiters of the queues they name.
+
+    One per process and connection: a thread holding one Pub/Sub connection, whatever the number of waiters.
+    Waiters always check their queue after registering, and every waiter is woken when the subscription is
+    (re)established, so a notification lost while disconnected only causes a check, never a lost message.
+    """
+
+    def __init__(self, redis_connection: RedisConnection):
+        self.__redis_connection = redis_connection
+        self.__waiters: dict[str, list[Callable[[], None]]] = {}
+        self.__lock = threading.Lock()
+        self.pid = os.getpid()
+        threading.Thread(target=self.__run, name=NOTIFIER_CLIENT_NAME, daemon=True).start()
+
+    def register(self, queue_id: str, wake: Callable[[], None]) -> None:
+        with self.__lock:
+            self.__waiters.setdefault(queue_id, []).append(wake)
+
+    def unregister(self, queue_id: str, wake: Callable[[], None]) -> None:
+        with self.__lock:
+            waiters = self.__waiters.get(queue_id, [])
+            if wake in waiters:
+                waiters.remove(wake)
+            if not waiters:
+                self.__waiters.pop(queue_id, None)
+
+    def __wake(self, queue_id: str | None) -> None:
+        """Wakes waiters of **queue_id**, or all of them."""
+        with self.__lock:
+            if queue_id is None:
+                to_wake = [wake for waiters in self.__waiters.values() for wake in waiters]
+            else:
+                to_wake = list(self.__waiters.get(queue_id, ()))
+        for wake in to_wake:
+            wake()
+
+    def __run(self) -> None:
+        client = Redis(
+            host=self.__redis_connection.host,
+            port=self.__redis_connection.port,
+            db=self.__redis_connection.db,
+            client_name=NOTIFIER_CLIENT_NAME,
+        )
+        pubsub = None
+        backoff = 0.1
+        while True:
+            try:
+                if pubsub is None:
+                    pubsub = client.pubsub()
+                    pubsub.subscribe(_wake_channel(self.__redis_connection))
+                message = pubsub.get_message(timeout=1.0)
+                backoff = 0.1
+                if message is None:
+                    continue
+                if message['type'] == 'subscribe':
+                    # Also received after an automatic reconnection: notifications may have been missed
+                    self.__wake(None)
+                elif message['type'] == 'message':
+                    self.__wake(message['data'].decode())
+            except Exception as e:
+                logger.warning(f'Push notifications interrupted, retrying in {backoff}s: {e!r}')
+                try:
+                    if pubsub is not None:
+                        pubsub.close()
+                except Exception:
+                    pass
+                pubsub = None
+                self.__wake(None)
+                time.sleep(backoff)
+                backoff = min(backoff * 2, 5.0)
+
+
+_notifiers: dict[RedisConnection, _Notifier] = {}
+_notifiers_lock = threading.Lock()
+
+
+def _notifier(redis_connection: RedisConnection) -> _Notifier:
+    with _notifiers_lock:
+        notifier = _notifiers.get(redis_connection)
+        if notifier is None or notifier.pid != os.getpid():  # Threads don't survive a fork
+            notifier = _notifiers[redis_connection] = _Notifier(redis_connection)
+        return notifier
+
+
 class RedisQueue(Queue):
     """
     Durable queue: messages are pickled and kept in a Redis list, so several processes can share it.
@@ -125,11 +223,14 @@ class RedisQueue(Queue):
     data and queue id) is saved: its messages stay in Redis.
     Queues with equal connection data share one client.
 
-    :meth:`pop` without timeout returns immediately, as eric-sse requires. With a timeout it waits for a message,
-    relying on `BLPOP <https://redis.io/docs/latest/commands/blpop/>`_, so it doesn't poll. This replaces
-    ``BlockingRedisQueue`` of previous versions: callers choose whether to wait, e.g. with
+    :meth:`pop` without timeout returns immediately, as eric-sse requires. With a timeout it waits for a message:
+    this replaces ``BlockingRedisQueue`` of previous versions, callers choose whether to wait, e.g. with
     :meth:`~eric_sse.entities.AbstractChannel.wait_next` or ``queue.pop(timeout=...)``.
-    :meth:`~eric_sse.queues.Queue.wait_pop` is inherited: it runs :meth:`pop` in a worker thread.
+
+    Waits don't poll and don't hold a Redis connection: :meth:`push` publishes a notification on a Pub/Sub channel,
+    that one connection per process receives to wake the waiters of the queue. :meth:`wait_pop` waits natively,
+    without a thread. A waiter checks the queue once more when its timeout expires, so a lost notification can delay
+    a message, never lose it.
 
     :param redis_connection: Defaults to a local Redis, database 0.
     :param queue_id: Identifies the Redis list. Defaults to a new uuid.
@@ -158,24 +259,96 @@ class RedisQueue(Queue):
     def _key(self) -> str:
         return f'{PREFIX_MESSAGES}:{self.__queue_id}'
 
-    def pop(self, timeout: float = 0) -> Any:
+    def __lpop(self) -> bytes | None:
         try:
-            if timeout > 0:
-                # BLPOP blocks forever with a 0 timeout, so it's only used with a positive one
-                result = self.__client.blpop([self._key], timeout=timeout)
-                raw_value = result[1] if result is not None else None
-            else:
-                raw_value = self.__client.lpop(self._key)
+            return self.__client.lpop(self._key)
         except Exception as e:
             raise RepositoryError(e) from None
 
-        if raw_value is None:
-            raise NoMessagesException
-        return loads(raw_value)
+    def __push_and_notify(self, raw_message: bytes, front: bool = False) -> None:
+        # In a transaction: a pushed message is always notified
+        with self.__client.pipeline(transaction=True) as pipe:
+            if front:
+                pipe.lpush(self._key, raw_message)
+            else:
+                pipe.rpush(self._key, raw_message)
+            pipe.publish(_wake_channel(self.__redis_connection), self.__queue_id)
+            pipe.execute()
+
+    def pop(self, timeout: float = 0) -> Any:
+        if timeout <= 0:
+            raw_value = self.__lpop()
+            if raw_value is None:
+                raise NoMessagesException
+            return loads(raw_value)
+
+        deadline = time.monotonic() + timeout
+        woken = threading.Event()
+        notifier = _notifier(self.__redis_connection)
+        notifier.register(self.__queue_id, woken.set)
+        try:
+            while True:
+                woken.clear()  # Before checking: a push notified after the check wakes the wait below
+                raw_value = self.__lpop()
+                if raw_value is not None:
+                    return loads(raw_value)
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise NoMessagesException
+                woken.wait(remaining)
+        finally:
+            notifier.unregister(self.__queue_id, woken.set)
+
+    async def wait_pop(self, timeout: float) -> Any:
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + timeout
+        woken = asyncio.Event()
+
+        def wake() -> None:
+            try:
+                loop.call_soon_threadsafe(woken.set)
+            except RuntimeError:
+                pass  # Loop already closed
+
+        notifier = _notifier(self.__redis_connection)
+        notifier.register(self.__queue_id, wake)
+        try:
+            while True:
+                woken.clear()
+                raw_value = await self.__lpop_async()
+                if raw_value is not None:
+                    return loads(raw_value)
+                remaining = deadline - loop.time()
+                if remaining <= 0:
+                    raise NoMessagesException
+                try:
+                    await asyncio.wait_for(woken.wait(), remaining)
+                except asyncio.TimeoutError:
+                    pass  # Checks the queue once more before giving up
+        finally:
+            notifier.unregister(self.__queue_id, wake)
+
+    async def __lpop_async(self) -> bytes | None:
+        # The pop runs in a worker thread only for its round trip, so the event loop is never blocked
+        popping = asyncio.ensure_future(asyncio.to_thread(self.__lpop))
+        try:
+            return await asyncio.shield(popping)
+        except asyncio.CancelledError:
+            # The pop can't be interrupted: a message it gets after the cancellation is put back at the head
+            popping.add_done_callback(self.__requeue_popped)
+            raise
+
+    def __requeue_popped(self, popping: asyncio.Future) -> None:
+        if popping.cancelled() or popping.exception() is not None or popping.result() is None:
+            return
+        try:
+            self.__push_and_notify(popping.result(), front=True)
+        except Exception as e:
+            logger.error(f'Message popped by a cancelled wait could not be put back in queue {self.__queue_id}: {e!r}')
 
     def push(self, message: MessageContract) -> None:
         try:
-            self.__client.rpush(self._key, dumps(message))
+            self.__push_and_notify(dumps(message))
         except Exception as e:
             raise RepositoryError(e) from None
 

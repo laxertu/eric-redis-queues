@@ -53,18 +53,35 @@ def _escape_glob(value: str) -> str:
     return ''.join(f'\\{c}' if c in '\\*?[]' else c for c in value)
 
 
+_lock = threading.Lock()
+_clients: dict[RedisConnection, Redis] = {}
+_async_clients: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()  # Async clients belong to one event loop
+
+
+def _shared_client(redis_connection: RedisConnection) -> Redis:
+    with _lock:
+        if redis_connection not in _clients:
+            _clients[redis_connection] = redis_connection.create_client()
+        return _clients[redis_connection]
+
+
+def _shared_async_client(redis_connection: RedisConnection) -> AsyncRedis:
+    clients = _async_clients.setdefault(asyncio.get_running_loop(), {})
+    if redis_connection not in clients:
+        clients[redis_connection] = redis_connection.create_async_client()
+    return clients[redis_connection]
+
+
 class RedisStorage(KvStorage):
     """
     :class:`~eric_sse.repository.KvStorage` backed by Redis. Values are pickled.
 
-    :param client: Must not decode responses.
+    :param redis_connection: Defaults to a local Redis, database 0. Shares the client of queues with equal connection data.
     :param prefix: Prepended to every key. Prefixes of storages sharing a database must not be prefixes of each other.
     """
 
-    def __init__(self, client: Redis, prefix: str = PREFIX_STORAGE):
-        if client.get_connection_kwargs().get('decode_responses'):
-            raise ValueError('The Redis client must not decode responses')
-        self.__client = client
+    def __init__(self, redis_connection: RedisConnection | None = None, prefix: str = PREFIX_STORAGE):
+        self.__client = _shared_client(redis_connection or RedisConnection())
         self.__prefix = prefix
 
     @property
@@ -92,25 +109,6 @@ class RedisStorage(KvStorage):
     def delete(self, key: str):
         with _repository_errors():
             self.__client.delete(self.__prefix + key)
-
-
-_lock = threading.Lock()
-_clients: dict[RedisConnection, Redis] = {}
-_async_clients: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()  # Async clients belong to one event loop
-
-
-def _shared_client(redis_connection: RedisConnection) -> Redis:
-    with _lock:
-        if redis_connection not in _clients:
-            _clients[redis_connection] = redis_connection.create_client()
-        return _clients[redis_connection]
-
-
-def _shared_async_client(redis_connection: RedisConnection) -> AsyncRedis:
-    clients = _async_clients.setdefault(asyncio.get_running_loop(), {})
-    if redis_connection not in clients:
-        clients[redis_connection] = redis_connection.create_async_client()
-    return clients[redis_connection]
 
 
 class RedisQueue(Queue):

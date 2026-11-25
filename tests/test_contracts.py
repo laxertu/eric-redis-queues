@@ -12,7 +12,7 @@ from eric_sse.repository import PrefixedStorage
 
 from eric_redis_queues import RedisStorage
 from eric_redis_queues.repository import RedisQueueRepository, redis_channel_repository_builder
-from tests.redis_fixture import REDIS_CLIENT, REDIS_CONNECTION, RedisFixture
+from tests.redis_fixture import REDIS_CONNECTION, RedisFixture
 
 
 def redis_builder() -> ChannelRepositoryBuilder:
@@ -58,7 +58,7 @@ class RedisChannelErrorHandlingTestCase(RedisFixture, ChannelErrorHandlingContra
         eric_logger.setLevel(logging.DEBUG)
 
     def create_builder(self) -> ChannelRepositoryBuilder:
-        storage = RedisStorage(REDIS_CLIENT)
+        storage = RedisStorage(REDIS_CONNECTION)
         return (
             ChannelRepositoryBuilder(SSEChannel)
             .channels(PrefixedStorage(storage, 'channel:'))

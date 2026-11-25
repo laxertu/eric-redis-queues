@@ -11,9 +11,8 @@ Changelog
   error handlers) before ``build()``
 * BREAKING: ``BlockingRedisQueue`` and ``RedisSSEChannelBlockingQueuesRepository`` removed, see
   `Blocking queues`_ below
-* BREAKING: ``RedisStorage`` takes a ``redis.Redis`` client, so its connection details (credentials, TLS, pool,
-  timeouts) are up to the application. The client must not decode responses. ``RedisQueue``,
-  ``RedisQueueRepository`` and ``redis_channel_repository_builder`` take a ``RedisConnection`` (host, port, db)
+* BREAKING: ``RedisStorage(redis_connection, prefix)``: arguments swapped, and ``prefix`` has a default. Storages and
+  queues with equal connection data share one client, so one connection pool
 * BREAKING: keys layout changed: data persisted by 2.x is not readable by 3.x
 * ``RedisStorage`` implements eric-sse 3 ``KvStorage``: prefix searches match ``*``, ``?``, ``[``, ``]`` literally and
   tolerate deletions while results are iterated

@@ -323,9 +323,8 @@ wires everything to Redis through eric-sse’s <code class="docutils literal not
 error handlers) before <code class="docutils literal notranslate"><span class="pre">build()</span></code></p></li>
 <li><p>BREAKING: <code class="docutils literal notranslate"><span class="pre">BlockingRedisQueue</span></code> and <code class="docutils literal notranslate"><span class="pre">RedisSSEChannelBlockingQueuesRepository</span></code> removed, see
 <a class="reference internal" href="#blocking-queues">Blocking queues</a> below</p></li>
-<li><p>BREAKING: <code class="docutils literal notranslate"><span class="pre">RedisStorage</span></code> takes a <code class="docutils literal notranslate"><span class="pre">redis.Redis</span></code> client, so its connection details (credentials, TLS, pool,
-timeouts) are up to the application. The client must not decode responses. <code class="docutils literal notranslate"><span class="pre">RedisQueue</span></code>,
-<code class="docutils literal notranslate"><span class="pre">RedisQueueRepository</span></code> and <code class="docutils literal notranslate"><span class="pre">redis_channel_repository_builder</span></code> take a <code class="docutils literal notranslate"><span class="pre">RedisConnection</span></code> (host, port, db)</p></li>
+<li><p>BREAKING: <code class="docutils literal notranslate"><span class="pre">RedisStorage(redis_connection,</span> <span class="pre">prefix)</span></code>: arguments swapped, and <code class="docutils literal notranslate"><span class="pre">prefix</span></code> has a default. Storages and
+queues with equal connection data share one client, so one connection pool</p></li>
 <li><p>BREAKING: keys layout changed: data persisted by 2.x is not readable by 3.x</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">RedisStorage</span></code> implements eric-sse 3 <code class="docutils literal notranslate"><span class="pre">KvStorage</span></code>: prefix searches match <code class="docutils literal notranslate"><span class="pre">*</span></code>, <code class="docutils literal notranslate"><span class="pre">?</span></code>, <code class="docutils literal notranslate"><span class="pre">[</span></code>, <code class="docutils literal notranslate"><span class="pre">]</span></code> literally and
 tolerate deletions while results are iterated</p></li>

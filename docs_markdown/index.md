@@ -41,13 +41,13 @@ Bases: [`KvStorage`](https://laxertu.github.io/eric/reference/persistence.html#e
 [`KvStorage`](https://laxertu.github.io/eric/reference/persistence.html#eric_sse.repository.KvStorage) backed by Redis. Values are pickled.
 
 * **Parameters:**
-  * **client** – Must not decode responses.
+  * **redis_connection** – Defaults to a local Redis, database 0. Shares the client of queues with equal connection data.
   * **prefix** – Prepended to every key. Prefixes of storages sharing a database must not be prefixes of each other.
 
-#### \_\_init_\_(client, prefix='eric-redis-queues:kv:')
+#### \_\_init_\_(redis_connection=None, prefix='eric-redis-queues:kv:')
 
 * **Parameters:**
-  * **client** (*Redis*)
+  * **redis_connection** ([*RedisConnection*](#eric_redis_queues.RedisConnection) *|* *None*)
   * **prefix** ([*str*](https://docs.python.org/3/builtins/stdtypes.html#str))
 
 #### fetch_by_prefix(prefix)

@@ -19,6 +19,6 @@ contract's unpicklable `BrokenQueue`. Remove both once eric-sse fixes the contra
 
 ## Redis with credentials or TLS
 
-`RedisConnection` only carries host, port and db: queues, and the storage when created through the builder, can't use
+`RedisConnection` only carries host, port and db: queues and storages can't use
 a Redis requiring a password or TLS. Add fields (e.g. username, password, ssl) if needed. Keep in mind that queues are
 pickled with their `RedisConnection`, so a password would be stored in Redis.

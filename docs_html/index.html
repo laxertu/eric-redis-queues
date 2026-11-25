@@ -302,6 +302,11 @@ document.write(`
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eric_redis_queues">Reference</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.PREFIX_STORAGE"><code class="docutils literal notranslate"><span class="pre">PREFIX_STORAGE</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.PREFIX_MESSAGES"><code class="docutils literal notranslate"><span class="pre">PREFIX_MESSAGES</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisConnection"><code class="docutils literal notranslate"><span class="pre">RedisConnection</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisConnection.create_client"><code class="docutils literal notranslate"><span class="pre">create_client()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisConnection.__init__"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisStorage"><code class="docutils literal notranslate"><span class="pre">RedisStorage</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisStorage.__init__"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisStorage.fetch_by_prefix"><code class="docutils literal notranslate"><span class="pre">fetch_by_prefix()</span></code></a></li>
@@ -318,9 +323,6 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.repository.RedisQueueRepository"><code class="docutils literal notranslate"><span class="pre">RedisQueueRepository</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.repository.RedisQueueRepository.__init__"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.repository.RedisQueueRepository.create"><code class="docutils literal notranslate"><span class="pre">create()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.repository.RedisQueueRepository.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.repository.RedisQueueRepository.persist"><code class="docutils literal notranslate"><span class="pre">persist()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.repository.RedisQueueRepository.delete"><code class="docutils literal notranslate"><span class="pre">delete()</span></code></a></li>
 </ul>
 </li>
@@ -355,8 +357,9 @@ document.write(`
 <li><p><a class="reference internal" href="#eric_redis_queues.RedisStorage" title="eric_redis_queues.RedisStorage"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisStorage</span></code></a>: a <a class="reference external" href="https://laxertu.github.io/eric/reference/persistence.html#eric_sse.repository.KvStorage" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">KvStorage</span></code></a>, to persist channels, connections, listeners and queues;</p></li>
 <li><p><a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a>: a durable <a class="reference external" href="https://laxertu.github.io/eric/reference/entities.html#eric_sse.queues.Queue" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Queue</span></code></a>, whose messages live in a Redis list.</p></li>
 </ul>
-<p>Both take a <code class="docutils literal notranslate"><span class="pre">redis.Redis</span></code> client: connection details (host, credentials, TLS, pool, timeouts) are up to the
-application. See <a class="reference internal" href="#eric_redis_queues.repository.redis_channel_repository_builder" title="eric_redis_queues.repository.redis_channel_repository_builder"><code class="xref py py-func docutils literal notranslate"><span class="pre">eric_redis_queues.repository.redis_channel_repository_builder()</span></code></a> to wire them together.</p>
+<p><a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a> is described by a <a class="reference internal" href="#eric_redis_queues.RedisConnection" title="eric_redis_queues.RedisConnection"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisConnection</span></code></a> (host, port and database), so it can be pickled.
+<a class="reference internal" href="#eric_redis_queues.RedisStorage" title="eric_redis_queues.RedisStorage"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisStorage</span></code></a> takes a <code class="docutils literal notranslate"><span class="pre">redis.Redis</span></code> client. See
+<a class="reference internal" href="#eric_redis_queues.repository.redis_channel_repository_builder" title="eric_redis_queues.repository.redis_channel_repository_builder"><code class="xref py py-func docutils literal notranslate"><span class="pre">eric_redis_queues.repository.redis_channel_repository_builder()</span></code></a> to wire them together.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="eric_redis_queues.PREFIX_STORAGE">
 <span class="sig-name descname"><span class="pre">PREFIX_STORAGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'eric-redis-queues:kv:'</span></em><a class="headerlink" href="#eric_redis_queues.PREFIX_STORAGE" title="Link to this definition">#</a></dt>
@@ -367,6 +370,41 @@ application. See <a class="reference internal" href="#eric_redis_queues.reposito
 <dt class="sig sig-object py" id="eric_redis_queues.PREFIX_MESSAGES">
 <span class="sig-name descname"><span class="pre">PREFIX_MESSAGES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'eric-redis-queues:m'</span></em><a class="headerlink" href="#eric_redis_queues.PREFIX_MESSAGES" title="Link to this definition">#</a></dt>
 <dd><p>Key prefix of the lists holding <a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a> messages.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="eric_redis_queues.RedisConnection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RedisConnection</span></span><a class="headerlink" href="#eric_redis_queues.RedisConnection" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Where a <a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a> keeps its messages.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="eric_redis_queues.RedisConnection.create_client">
+<span class="sig-name descname"><span class="pre">create_client</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.RedisConnection.create_client" title="Link to this definition">#</a></dt>
+<dd><p>Returns a new client. <a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a> instances share one client per connection instead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Redis</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eric_redis_queues.RedisConnection.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6379</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.RedisConnection.__init__" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>host</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>)</p></li>
+<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>)</p></li>
+<li><p><strong>db</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -457,8 +495,9 @@ prefixes of each other.</p></li>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RedisQueue</span></span><a class="headerlink" href="#eric_redis_queues.RedisQueue" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://laxertu.github.io/eric/reference/entities.html#eric_sse.queues.Queue" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Queue</span></code></a></p>
 <p>Durable queue: messages are pickled and kept in a Redis list, so several processes can share it.</p>
-<p>It can’t be pickled, as its client can’t: persist it with
-<a class="reference internal" href="#eric_redis_queues.repository.RedisQueueRepository" title="eric_redis_queues.repository.RedisQueueRepository"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueueRepository</span></code></a>, that stores its id and gives it a client when loading it.</p>
+<p>When pickled, e.g. by <a class="reference internal" href="#eric_redis_queues.repository.RedisQueueRepository" title="eric_redis_queues.repository.RedisQueueRepository"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueueRepository</span></code></a>, only its identity (connection
+data and queue id) is saved: its messages stay in Redis.
+Queues with equal connection data share one client.</p>
 <p><a class="reference internal" href="#eric_redis_queues.RedisQueue.pop" title="eric_redis_queues.RedisQueue.pop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pop()</span></code></a> without timeout returns immediately, as eric-sse requires. With a timeout it waits for a message,
 relying on <a class="reference external" href="https://redis.io/docs/latest/commands/blpop/">BLPOP</a>, so it doesn’t poll. This replaces
 <code class="docutils literal notranslate"><span class="pre">BlockingRedisQueue</span></code> of previous versions: callers choose whether to wait, e.g. with
@@ -467,19 +506,18 @@ relying on <a class="reference external" href="https://redis.io/docs/latest/comm
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>client</strong> – Must not decode responses (<code class="docutils literal notranslate"><span class="pre">decode_responses=False</span></code>, the default). A <code class="docutils literal notranslate"><span class="pre">socket_timeout</span></code>, if set,
-must be longer than the waits.</p></li>
+<li><p><strong>redis_connection</strong> – Defaults to a local Redis, database 0.</p></li>
 <li><p><strong>queue_id</strong> – Identifies the Redis list. Defaults to a new uuid.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="eric_redis_queues.RedisQueue.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.RedisQueue.__init__" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">redis_connection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.RedisQueue.__init__" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>client</strong> (<em>Redis</em>)</p></li>
+<li><p><strong>redis_connection</strong> (<a class="reference internal" href="#eric_redis_queues.RedisConnection" title="eric_redis_queues.RedisConnection"><em>RedisConnection</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>queue_id</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
 </ul>
 </dd>
@@ -518,64 +556,26 @@ must be longer than the waits.</p></li>
 <dl class="py class" id="module-eric_redis_queues.repository">
 <dt class="sig sig-object py" id="eric_redis_queues.repository.RedisQueueRepository">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RedisQueueRepository</span></span><a class="headerlink" href="#eric_redis_queues.repository.RedisQueueRepository" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://laxertu.github.io/eric/reference/persistence.html#eric_sse.interfaces.QueueRepositoryInterface" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QueueRepositoryInterface</span></code></a>[<a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a>]</p>
+<dd><p>Bases: <a class="reference external" href="https://laxertu.github.io/eric/reference/persistence.html#eric_sse.repository.KvQueueRepository" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">KvQueueRepository</span></code></a>[<a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a>]</p>
 <p>Creates, persists and loads <a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a> instances.</p>
-<p>Only queue ids are stored: loaded queues get <strong>client</strong>. Deleting a queue deletes its messages too.</p>
+<p>Queues are stored as they are: only their identity (connection data and queue id) is serialised, their messages
+stay in Redis. Deleting a queue deletes its messages too, that would be left in Redis otherwise.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>client</strong> – Given to the queues it creates and loads, see <a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisQueue</span></code></a>.</p></li>
-<li><p><strong>storage</strong> – Storage for queue ids, keyed by connection id.</p></li>
+<li><p><strong>redis_connection</strong> – Connection of the queues it creates.</p></li>
+<li><p><strong>storage</strong> – Storage for queues identity, keyed by connection id.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="eric_redis_queues.repository.RedisQueueRepository.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.repository.RedisQueueRepository.__init__" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">redis_connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.repository.RedisQueueRepository.__init__" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>client</strong> (<em>Redis</em>)</p></li>
+<li><p><strong>redis_connection</strong> (<a class="reference internal" href="#eric_redis_queues.RedisConnection" title="eric_redis_queues.RedisConnection"><em>RedisConnection</em></a>)</p></li>
 <li><p><strong>storage</strong> (<a class="reference external" href="https://laxertu.github.io/eric/reference/persistence.html#eric_sse.repository.KvStorage" title="(in eric-sse)"><em>KvStorage</em></a>)</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="eric_redis_queues.repository.RedisQueueRepository.create">
-<span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.repository.RedisQueueRepository.create" title="Link to this definition">#</a></dt>
-<dd><p>Creates a new queue. It is not persisted.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><em>RedisQueue</em></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="eric_redis_queues.repository.RedisQueueRepository.load">
-<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.repository.RedisQueueRepository.load" title="Link to this definition">#</a></dt>
-<dd><p>Loads a queue given the connection id it belongs to.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>connection_id</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>)</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><em>RedisQueue</em></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="eric_redis_queues.repository.RedisQueueRepository.persist">
-<span class="sig-name descname"><span class="pre">persist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.repository.RedisQueueRepository.persist" title="Link to this definition">#</a></dt>
-<dd><p>Persists queue and assign to connection.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>connection_id</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>)</p></li>
-<li><p><strong>queue</strong> (<a class="reference internal" href="#eric_redis_queues.RedisQueue" title="eric_redis_queues.RedisQueue"><em>RedisQueue</em></a>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -596,9 +596,9 @@ must be longer than the waits.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="eric_redis_queues.repository.redis_channel_repository_builder">
-<span class="sig-name descname"><span class="pre">redis_channel_repository_builder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.repository.redis_channel_repository_builder" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">redis_channel_repository_builder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">redis_connection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#eric_redis_queues.repository.redis_channel_repository_builder" title="Link to this definition">#</a></dt>
 <dd><p>Returns a <a class="reference external" href="https://laxertu.github.io/eric/reference/persistence.html#eric_sse.builder.ChannelRepositoryBuilder" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChannelRepositoryBuilder</span></code></a> persisting everything in Redis:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">repository</span> <span class="o">=</span> <span class="n">redis_channel_repository_builder</span><span class="p">(</span><span class="n">SSEChannel</span><span class="p">,</span> <span class="n">Redis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">repository</span> <span class="o">=</span> <span class="n">redis_channel_repository_builder</span><span class="p">(</span><span class="n">SSEChannel</span><span class="p">,</span> <span class="n">RedisConnection</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>It can be further configured before building, e.g. with listeners or error handlers.</p>
@@ -606,7 +606,8 @@ must be longer than the waits.</p></li>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>channel_class</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#type" title="(in Python v3.15)"><em>type</em></a><em>[</em><em>C</em><em>]</em>) – e.g. <a class="reference external" href="https://laxertu.github.io/eric/reference/prefabs.html#eric_sse.prefabs.SSEChannel" title="(in eric-sse)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSEChannel</span></code></a>.</p></li>
-<li><p><strong>client</strong> (<em>Redis</em>) – Must not decode responses (<code class="docutils literal notranslate"><span class="pre">decode_responses=False</span></code>, the default).</p></li>
+<li><p><strong>redis_connection</strong> (<a class="reference internal" href="#eric_redis_queues.RedisConnection" title="eric_redis_queues.RedisConnection"><em>RedisConnection</em></a><em> | </em><em>None</em>) – Used by queues, and by the storage of everything else. Defaults to a local Redis,
+database 0.</p></li>
 <li><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em> | </em><em>None</em>) – Key prefix of the storage, see <a class="reference internal" href="#eric_redis_queues.RedisStorage" title="eric_redis_queues.RedisStorage"><code class="xref py py-class docutils literal notranslate"><span class="pre">RedisStorage</span></code></a>.</p></li>
 </ul>
 </dd>
@@ -663,6 +664,11 @@ must be longer than the waits.</p></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eric_redis_queues">Reference</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.PREFIX_STORAGE"><code class="docutils literal notranslate"><span class="pre">PREFIX_STORAGE</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.PREFIX_MESSAGES"><code class="docutils literal notranslate"><span class="pre">PREFIX_MESSAGES</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisConnection"><code class="docutils literal notranslate"><span class="pre">RedisConnection</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisConnection.create_client"><code class="docutils literal notranslate"><span class="pre">create_client()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisConnection.__init__"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisStorage"><code class="docutils literal notranslate"><span class="pre">RedisStorage</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisStorage.__init__"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.RedisStorage.fetch_by_prefix"><code class="docutils literal notranslate"><span class="pre">fetch_by_prefix()</span></code></a></li>
@@ -679,9 +685,6 @@ must be longer than the waits.</p></li>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.repository.RedisQueueRepository"><code class="docutils literal notranslate"><span class="pre">RedisQueueRepository</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.repository.RedisQueueRepository.__init__"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.repository.RedisQueueRepository.create"><code class="docutils literal notranslate"><span class="pre">create()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.repository.RedisQueueRepository.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.repository.RedisQueueRepository.persist"><code class="docutils literal notranslate"><span class="pre">persist()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eric_redis_queues.repository.RedisQueueRepository.delete"><code class="docutils literal notranslate"><span class="pre">delete()</span></code></a></li>
 </ul>
 </li>

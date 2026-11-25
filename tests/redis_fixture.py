@@ -10,15 +10,14 @@ from unittest import SkipTest
 
 from redis.exceptions import ConnectionError as RedisConnectionError
 
-from redis import Redis
+from eric_redis_queues import PREFIX, RedisConnection
 
-from eric_redis_queues import PREFIX
-
-REDIS_CLIENT = Redis(
+REDIS_CONNECTION = RedisConnection(
     host=os.environ.get('REDIS_HOST', '127.0.0.1'),
     port=int(os.environ.get('REDIS_PORT', '6379')),
     db=int(os.environ.get('REDIS_DB', '15')),
 )
+REDIS_CLIENT = REDIS_CONNECTION.create_client()
 
 
 def clean_redis() -> None:

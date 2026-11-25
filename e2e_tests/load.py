@@ -7,11 +7,10 @@ import os
 
 from eric_sse.message import Message, SignedMessage
 from eric_sse.prefabs import SSEChannel
-from redis import Redis
-
+from eric_redis_queues import RedisConnection
 from eric_redis_queues.repository import redis_channel_repository_builder
 
-redis_client = Redis(
+redis_connection = RedisConnection(
     host=os.environ.get('REDIS_HOST', '127.0.0.1'),
     port=int(os.environ.get('REDIS_PORT', '6379')),
     db=int(os.environ.get('REDIS_DB', '0')),
@@ -19,7 +18,7 @@ redis_client = Redis(
 
 
 def build_repository():
-    return redis_channel_repository_builder(SSEChannel, redis_client).build()
+    return redis_channel_repository_builder(SSEChannel, redis_connection).build()
 
 
 def load() -> str:
